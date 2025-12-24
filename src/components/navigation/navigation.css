@@ -1,0 +1,248 @@
+/* Primary Navigation Styles */
+.primary-navigation {
+  @apply bg-white border-r border-gray-200 h-full overflow-y-auto;
+}
+
+.mobile-menu-toggle {
+  @apply p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md;
+}
+
+.hamburger-icon {
+  @apply w-6 h-6 flex flex-col justify-center space-y-1;
+}
+
+.hamburger-icon span {
+  @apply block w-full h-0.5 bg-current transition-all duration-200;
+}
+
+.navigation-menu {
+  @apply hidden md:block;
+}
+
+.navigation-menu.mobile-open {
+  @apply block absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50;
+}
+
+.navigation-sections {
+  @apply space-y-1 p-4;
+}
+
+.navigation-section {
+  @apply border-b border-gray-100 last:border-b-0 pb-4 last:pb-0;
+}
+
+.section-header {
+  @apply flex items-center justify-between;
+}
+
+.section-link {
+  @apply flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-150;
+}
+
+.section-link.current {
+  @apply text-blue-700 bg-blue-50;
+}
+
+.section-icon {
+  @apply w-5 h-5 text-gray-400;
+}
+
+.section-link.current .section-icon {
+  @apply text-blue-500;
+}
+
+.section-toggle {
+  @apply p-1 text-gray-400 hover:text-gray-600 rounded transition-colors duration-150;
+}
+
+.section-toggle.expanded {
+  @apply text-gray-600;
+}
+
+.toggle-icon {
+  @apply w-4 h-4 transition-transform duration-200;
+}
+
+.section-toggle.expanded .toggle-icon {
+  @apply rotate-180;
+}
+
+.subsections {
+  @apply mt-2 overflow-hidden transition-all duration-300;
+}
+
+.subsections.collapsed {
+  @apply max-h-0;
+}
+
+.subsections.expanded {
+  @apply max-h-screen;
+}
+
+.subsection {
+  @apply ml-8 mt-3 first:mt-2;
+}
+
+.subsection-header {
+  @apply flex items-center justify-between mb-2;
+}
+
+.subsection-title {
+  @apply text-xs font-semibold text-gray-500 uppercase tracking-wide;
+}
+
+.completion-time {
+  @apply text-xs text-gray-400;
+}
+
+.subsection-pages {
+  @apply space-y-1;
+}
+
+.page-link {
+  @apply flex items-center justify-between px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-150;
+}
+
+.page-link.current {
+  @apply text-blue-700 bg-blue-50 font-medium;
+}
+
+.read-time {
+  @apply text-xs text-gray-400;
+}
+
+/* Breadcrumbs Styles */
+.breadcrumbs {
+  @apply py-2 px-4 bg-gray-50 border-b border-gray-200;
+}
+
+.breadcrumb-list {
+  @apply flex items-center space-x-2 text-sm;
+}
+
+.breadcrumb-item {
+  @apply flex items-center;
+}
+
+.breadcrumb-link {
+  @apply text-gray-500 hover:text-gray-700 transition-colors duration-150;
+}
+
+.breadcrumb-separator {
+  @apply mx-2 text-gray-400;
+}
+
+.breadcrumb-current {
+  @apply text-gray-900 font-medium;
+}
+
+/* Progress Indicator Styles */
+.progress-indicator {
+  @apply bg-white border border-gray-200 rounded-lg p-4;
+}
+
+.progress-indicator.horizontal {
+  @apply space-y-4;
+}
+
+.progress-indicator.vertical {
+  @apply space-y-6;
+}
+
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-fill {
+  @apply bg-blue-600 h-2 rounded-full transition-all duration-300;
+}
+
+.progress-steps {
+  @apply flex justify-between;
+}
+
+.progress-indicator.vertical .progress-steps {
+  @apply flex-col space-y-4;
+}
+
+.progress-step {
+  @apply flex items-center space-x-3;
+}
+
+.progress-indicator.vertical .progress-step {
+  @apply flex-row;
+}
+
+.step-indicator {
+  @apply w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center bg-white;
+}
+
+.progress-step.completed .step-indicator {
+  @apply border-green-500 bg-green-500 text-white;
+}
+
+.progress-step.current .step-indicator {
+  @apply border-blue-500 bg-blue-500 text-white;
+}
+
+.step-check {
+  @apply w-4 h-4;
+}
+
+.step-number {
+  @apply text-sm font-medium text-gray-500;
+}
+
+.progress-step.completed .step-number,
+.progress-step.current .step-number {
+  @apply text-white;
+}
+
+.step-title {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.progress-step.completed .step-title {
+  @apply text-gray-900;
+}
+
+.progress-step.current .step-title {
+  @apply text-blue-700 font-semibold;
+}
+
+.progress-summary {
+  @apply flex justify-between items-center text-sm;
+}
+
+.progress-text {
+  @apply text-gray-600;
+}
+
+.progress-percentage {
+  @apply font-semibold text-gray-900;
+}
+
+/* Screen reader only */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navigation-menu.mobile-open {
+    @apply max-h-96 overflow-y-auto;
+  }
+  
+  .subsection {
+    @apply ml-4;
+  }
+  
+  .progress-steps {
+    @apply flex-col space-y-3;
+  }
+  
+  .progress-step {
+    @apply justify-start;
+  }
+}

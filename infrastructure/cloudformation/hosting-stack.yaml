@@ -1,0 +1,154 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch APM Documentation - Hosting Infrastructure'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: staging
+    AllowedValues:
+      - staging
+      - production
+    Description: Environment name
+  
+  DomainName:
+    Type: String
+    Description: Custom domain name (e.g., docs.cloudwatch-apm.aws.amazon.com)
+    Default: ''
+  
+  CertificateArn:
+    Type: String
+    Description: ACM Certificate ARN for SSL/TLS
+    Default: ''
+
+Conditions:
+  HasCustomDomain: !Not [!Equals [!Ref DomainName, '']]
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+
+Resources:
+  # S3 Bucket for static site hosting
+  DocumentationBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'cloudwatch-apm-docs-${Environment}-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 30
+
+  # CloudFront Origin Access Control
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub 'cloudwatch-apm-docs-oac-${Environment}'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # CloudFront Distribution
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases: !If
+          - HasCustomDomain
+          - [!Ref DomainName]
+          - !Ref AWS::NoValue
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt DocumentationBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !Ref OriginAccessControl
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # Managed-CachingDisabled
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # Managed-CORS-S3Origin
+          ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03 # Managed-SecurityHeadersPolicy
+        CustomErrorPages:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /404.html
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        PriceClass: PriceClass_100
+        ViewerCertificate: !If
+          - HasCertificate
+          - AcmCertificateArn: !Ref CertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
+
+  # S3 Bucket Policy
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DocumentationBucket
+      PolicyDocument:
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipal
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${DocumentationBucket}/*'
+            Condition:
+              StringEquals:
+                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+  # Route53 DNS Record (if custom domain is provided)
+  DNSRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: HasCustomDomain
+    Properties:
+      HostedZoneName: !Sub '${DomainName}.'
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2 # CloudFront hosted zone ID
+
+Outputs:
+  BucketName:
+    Description: S3 Bucket name for static site content
+    Value: !Ref DocumentationBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketName'
+  
+  DistributionId:
+    Description: CloudFront Distribution ID
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub '${AWS::StackName}-DistributionId'
+  
+  DistributionDomainName:
+    Description: CloudFront Distribution Domain Name
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub '${AWS::StackName}-DistributionDomainName'
+  
+  WebsiteURL:
+    Description: Website URL
+    Value: !If
+      - HasCustomDomain
+      - !Sub 'https://${DomainName}'
+      - !Sub 'https://${CloudFrontDistribution.DomainName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-WebsiteURL'
