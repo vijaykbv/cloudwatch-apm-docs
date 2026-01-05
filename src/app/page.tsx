@@ -12,6 +12,7 @@ import SecurityChecklist from '@/components/security/SecurityChecklist'
 import PerformanceMetricsDisplay from '@/components/performance/PerformanceMetricsDisplay'
 import { MigrationWizard } from '@/components/migration'
 import ConfigurationReferenceGenerator from '@/components/configuration/ConfigurationReferenceGenerator'
+import { CostOptimizationCenter } from '@/components/cost-optimization'
 import { SearchSystem } from '@/lib/search-system'
 import { RecommendationSystem } from '@/lib/recommendation-system'
 import { analytics, getAnalytics } from '@/lib/analytics'
@@ -31,6 +32,7 @@ type AppSection =
   | 'performance' 
   | 'migration' 
   | 'configuration'
+  | 'cost-optimization'
   | 'search'
 
 export default function Home() {
@@ -281,6 +283,13 @@ export default function Home() {
           </ContentErrorBoundary>
         )
       
+      case 'cost-optimization':
+        return (
+          <ContentErrorBoundary>
+            <CostOptimizationCenter />
+          </ContentErrorBoundary>
+        )
+      
       case 'search':
         return (
           <SearchErrorBoundary>
@@ -352,6 +361,30 @@ export default function Home() {
                 >
                   <h3 className="text-lg font-semibold mb-2">Security</h3>
                   <p className="text-gray-600">Security configuration and compliance</p>
+                </div>
+                
+                <div 
+                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleSectionChange('cost-optimization')}
+                >
+                  <h3 className="text-lg font-semibold mb-2">💰 Cost Optimization</h3>
+                  <p className="text-gray-600">Reduce APM costs while maintaining visibility</p>
+                </div>
+                
+                <div 
+                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleSectionChange('performance')}
+                >
+                  <h3 className="text-lg font-semibold mb-2">Performance</h3>
+                  <p className="text-gray-600">Performance optimization and tuning</p>
+                </div>
+                
+                <div 
+                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleSectionChange('migration')}
+                >
+                  <h3 className="text-lg font-semibold mb-2">Migration</h3>
+                  <p className="text-gray-600">Migrate from other APM solutions</p>
                 </div>
               </div>
 

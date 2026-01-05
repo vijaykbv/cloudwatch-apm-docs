@@ -11,6 +11,7 @@ type AppSection =
   | 'performance' 
   | 'migration' 
   | 'configuration'
+  | 'cost-optimization'
   | 'search'
 
 interface PrimaryNavigationProps {
@@ -37,6 +38,7 @@ export const PrimaryNavigation: React.FC<PrimaryNavigationProps> = ({
     { id: 'monitoring' as AppSection, title: 'Monitoring', icon: '📊' },
     { id: 'security' as AppSection, title: 'Security', icon: '🔒' },
     { id: 'performance' as AppSection, title: 'Performance', icon: '⚡' },
+    { id: 'cost-optimization' as AppSection, title: 'Cost Optimization', icon: '💰' },
     { id: 'search' as AppSection, title: 'Search', icon: '🔍' },
   ];
 

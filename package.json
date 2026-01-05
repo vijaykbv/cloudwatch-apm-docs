@@ -31,6 +31,8 @@
     "rollback:production": "node scripts/rollback.js production"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity": "^3.962.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.962.0",
     "clsx": "^2.1.1",
     "fuse.js": "^7.1.0",
     "gray-matter": "^4.0.3",

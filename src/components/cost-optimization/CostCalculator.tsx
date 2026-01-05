@@ -1,0 +1,374 @@
+import React, { useState, useEffect } from 'react';
+
+interface CostInputs {
+  tracesPerMonth: number;
+  samplingRate: number;
+  customMetrics: number;
+  logVolumeGB: number;
+  retentionDays: number;
+  applicationSignals: boolean;
+  transactionSearch: boolean;
+}
+
+interface CostBreakdown {
+  traces: number;
+  customMetrics: number;
+  logs: number;
+  applicationSignals: number;
+  transactionSearch: number;
+  total: number;
+}
+
+export const CostCalculator: React.FC = () => {
+  const [inputs, setInputs] = useState<CostInputs>({
+    tracesPerMonth: 1000000,
+    samplingRate: 5,
+    customMetrics: 50,
+    logVolumeGB: 10,
+    retentionDays: 30,
+    applicationSignals: false,
+    transactionSearch: false
+  });
+
+  const [costs, setCosts] = useState<CostBreakdown>({
+    traces: 0,
+    customMetrics: 0,
+    logs: 0,
+    applicationSignals: 0,
+    transactionSearch: 0,
+    total: 0
+  });
+
+  // AWS CloudWatch pricing (approximate, as of 2024)
+  const pricing = {
+    tracesPer1M: 5.00,        // $5 per 1M traces
+    customMetricPerMonth: 0.30, // $0.30 per metric per month
+    logIngestionPerGB: 0.50,   // $0.50 per GB ingested
+    logStoragePerGB: 0.03,     // $0.03 per GB per month
+    applicationSignalsBase: 10, // Base cost for Application Signals
+    transactionSearchPerGB: 2.50 // $2.50 per GB for Transaction Search
+  };
+
+  useEffect(() => {
+    calculateCosts();
+  }, [inputs]);
+
+  const calculateCosts = () => {
+    const sampledTraces = (inputs.tracesPerMonth * inputs.samplingRate) / 100;
+    const traceCost = (sampledTraces / 1000000) * pricing.tracesPer1M;
+    
+    const customMetricsCost = inputs.customMetrics * pricing.customMetricPerMonth;
+    
+    const logIngestionCost = inputs.logVolumeGB * pricing.logIngestionPerGB;
+    const logStorageCost = inputs.logVolumeGB * pricing.logStoragePerGB * (inputs.retentionDays / 30);
+    const totalLogCost = logIngestionCost + logStorageCost;
+    
+    const applicationSignalsCost = inputs.applicationSignals ? pricing.applicationSignalsBase : 0;
+    const transactionSearchCost = inputs.transactionSearch ? 
+      inputs.logVolumeGB * pricing.transactionSearchPerGB : 0;
+    
+    const total = traceCost + customMetricsCost + totalLogCost + 
+                 applicationSignalsCost + transactionSearchCost;
+
+    setCosts({
+      traces: traceCost,
+      customMetrics: customMetricsCost,
+      logs: totalLogCost,
+      applicationSignals: applicationSignalsCost,
+      transactionSearch: transactionSearchCost,
+      total
+    });
+  };
+
+  const handleInputChange = (field: keyof CostInputs, value: number | boolean) => {
+    setInputs(prev => ({ ...prev, [field]: value }));
+  };
+
+  const optimizationSuggestions = () => {
+    const suggestions = [];
+    
+    if (inputs.samplingRate > 5) {
+      const optimizedCost = costs.total * (5 / inputs.samplingRate);
+      suggestions.push({
+        type: 'sampling',
+        message: `Reduce sampling to 5% to save ~$${(costs.total - optimizedCost).toFixed(2)}/month`,
+        impact: 'high'
+      });
+    }
+    
+    if (inputs.customMetrics > 100) {
+      const optimizedCost = costs.total - ((inputs.customMetrics - 100) * pricing.customMetricPerMonth);
+      suggestions.push({
+        type: 'metrics',
+        message: `Reduce custom metrics to 100 to save ~$${(costs.total - optimizedCost).toFixed(2)}/month`,
+        impact: 'medium'
+      });
+    }
+    
+    if (inputs.retentionDays > 30) {
+      const optimizedCost = costs.total - (costs.logs * (inputs.retentionDays - 30) / inputs.retentionDays);
+      suggestions.push({
+        type: 'retention',
+        message: `Reduce log retention to 30 days to save ~$${(costs.total - optimizedCost).toFixed(2)}/month`,
+        impact: 'low'
+      });
+    }
+    
+    return suggestions;
+  };
+
+  const suggestions = optimizationSuggestions();
+
+  return (
+    <div className="space-y-8">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-4">🧮 APM Cost Calculator</h2>
+        <p className="text-gray-600">
+          Estimate your monthly APM costs and discover optimization opportunities
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Input Panel */}
+        <div className="space-y-6">
+          <div className="bg-white border rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Configuration Inputs</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Traces per Month
+                </label>
+                <input
+                  type="number"
+                  value={inputs.tracesPerMonth}
+                  onChange={(e) => handleInputChange('tracesPerMonth', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Total traces generated by your application
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Sampling Rate (%)
+                </label>
+                <input
+                  type="number"
+                  min="0.1"
+                  max="100"
+                  step="0.1"
+                  value={inputs.samplingRate}
+                  onChange={(e) => handleInputChange('samplingRate', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Percentage of traces actually sent to CloudWatch
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Custom Metrics Count
+                </label>
+                <input
+                  type="number"
+                  value={inputs.customMetrics}
+                  onChange={(e) => handleInputChange('customMetrics', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Number of unique custom metric combinations
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Log Volume (GB/month)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={inputs.logVolumeGB}
+                  onChange={(e) => handleInputChange('logVolumeGB', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Monthly log ingestion volume
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Log Retention (days)
+                </label>
+                <input
+                  type="number"
+                  value={inputs.retentionDays}
+                  onChange={(e) => handleInputChange('retentionDays', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  How long logs are stored
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={inputs.applicationSignals}
+                    onChange={(e) => handleInputChange('applicationSignals', e.target.checked)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium">Enable Application Signals</span>
+                </label>
+                
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={inputs.transactionSearch}
+                    onChange={(e) => handleInputChange('transactionSearch', e.target.checked)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium">Enable Transaction Search</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Panel */}
+        <div className="space-y-6">
+          {/* Cost Breakdown */}
+          <div className="bg-white border rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Monthly Cost Breakdown</h3>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">X-Ray Traces</span>
+                <span className="font-medium">${costs.traces.toFixed(2)}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Custom Metrics</span>
+                <span className="font-medium">${costs.customMetrics.toFixed(2)}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm">CloudWatch Logs</span>
+                <span className="font-medium">${costs.logs.toFixed(2)}</span>
+              </div>
+              
+              {inputs.applicationSignals && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Application Signals</span>
+                  <span className="font-medium">${costs.applicationSignals.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {inputs.transactionSearch && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Transaction Search</span>
+                  <span className="font-medium">${costs.transactionSearch.toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div className="border-t pt-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold">Total Monthly Cost</span>
+                  <span className="text-xl font-bold text-blue-600">
+                    ${costs.total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Cost Category */}
+          <div className="bg-white border rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Cost Category</h3>
+            <div className="text-center">
+              {costs.total < 50 && (
+                <div className="text-green-600">
+                  <div className="text-2xl font-bold">💚 Startup Friendly</div>
+                  <p className="text-sm mt-2">Great for personal projects and small applications</p>
+                </div>
+              )}
+              {costs.total >= 50 && costs.total < 200 && (
+                <div className="text-yellow-600">
+                  <div className="text-2xl font-bold">⚡ Production Ready</div>
+                  <p className="text-sm mt-2">Suitable for production applications with good observability</p>
+                </div>
+              )}
+              {costs.total >= 200 && (
+                <div className="text-red-600">
+                  <div className="text-2xl font-bold">🏢 Enterprise Scale</div>
+                  <p className="text-sm mt-2">High-scale applications with comprehensive monitoring</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Optimization Suggestions */}
+          {suggestions.length > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 text-yellow-800">
+                💡 Optimization Suggestions
+              </h3>
+              <div className="space-y-2">
+                {suggestions.map((suggestion, index) => (
+                  <div key={index} className="text-sm text-yellow-700">
+                    <span className="font-medium">•</span> {suggestion.message}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Usage Scenarios */}
+      <div className="bg-gray-50 rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4">Common Usage Scenarios</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-4 rounded border">
+            <h4 className="font-medium mb-2">Small Application</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• 100K traces/month</li>
+              <li>• 1% sampling</li>
+              <li>• 10 custom metrics</li>
+              <li>• 1GB logs/month</li>
+              <li>• ~$15-25/month</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded border">
+            <h4 className="font-medium mb-2">Medium Application</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• 1M traces/month</li>
+              <li>• 2% sampling</li>
+              <li>• 50 custom metrics</li>
+              <li>• 10GB logs/month</li>
+              <li>• ~$75-125/month</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded border">
+            <h4 className="font-medium mb-2">Large Application</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• 10M traces/month</li>
+              <li>• 5% sampling</li>
+              <li>• 200 custom metrics</li>
+              <li>• 100GB logs/month</li>
+              <li>• ~$300-500/month</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CostCalculator;
