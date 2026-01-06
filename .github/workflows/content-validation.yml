@@ -1,0 +1,108 @@
+name: Content Validation
+
+on:
+  push:
+    paths:
+      - 'content/**'
+      - 'src/content/**'
+  pull_request:
+    paths:
+      - 'content/**'
+      - 'src/content/**'
+
+jobs:
+  validate-content:
+    name: Validate Documentation Content
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate markdown syntax
+        run: |
+          # Install markdownlint-cli
+          npm install -g markdownlint-cli
+          
+          # Run markdownlint on all markdown files
+          markdownlint content/**/*.md src/content/**/*.md
+
+      - name: Check for broken internal links
+        run: |
+          # Install markdown-link-check
+          npm install -g markdown-link-check
+          
+          # Check all markdown files for broken links
+          find content src/content -name "*.md" -exec markdown-link-check {} \;
+
+      - name: Validate frontmatter
+        run: |
+          # Custom script to validate frontmatter in markdown files
+          node scripts/validate-frontmatter.js
+
+      - name: Check for missing images
+        run: |
+          # Check that all referenced images exist
+          node scripts/validate-images.js
+
+      - name: Validate code examples
+        run: |
+          # Extract and validate code examples
+          node scripts/validate-code-examples.js
+
+      - name: Check content structure
+        run: |
+          # Validate that required sections exist
+          node scripts/validate-content-structure.js
+
+      - name: Spell check
+        run: |
+          # Install cspell
+          npm install -g cspell
+          
+          # Run spell check on markdown files
+          cspell "content/**/*.md" "src/content/**/*.md"
+
+      - name: Check for accessibility issues
+        run: |
+          # Validate that content follows accessibility guidelines
+          node scripts/validate-accessibility.js
+
+      - name: Generate content report
+        run: |
+          # Generate a report of content statistics
+          node scripts/generate-content-report.js > content-report.md
+
+      - name: Upload content report
+        uses: actions/upload-artifact@v3
+        with:
+          name: content-report
+          path: content-report.md
+
+      - name: Comment on PR with validation results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const report = fs.readFileSync('content-report.md', 'utf8');
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## Content Validation Report\n\n${report}`
+              });
+            } catch (error) {
+              console.log('No content report found');
+            }

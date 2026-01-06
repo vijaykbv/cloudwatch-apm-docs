@@ -1,0 +1,681 @@
+name: Deploy CloudWatch APM Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+env:
+  NODE_VERSION: '18'
+  AWS_REGION: 'us-east-1'
+
+jobs:
+  # Content validation and link checking
+  validate:
+    name: Validate Content
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate markdown content
+        run: |
+          # Check for broken internal links
+          npm run validate:links
+          
+          # Validate markdown syntax
+          npm run validate:markdown
+          
+          # Check for missing images and assets
+          npm run validate:assets
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Check formatting
+        run: npm run format:check
+
+  # Run tests
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:ci
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # Build application
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [validate, test]
+    strategy:
+      matrix:
+        environment: [staging, production]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Load environment variables
+        run: |
+          if [ "${{ matrix.environment }}" = "staging" ]; then
+            echo "NEXT_PUBLIC_ENVIRONMENT=staging" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_API_URL=https://api-staging.cloudwatch-apm-docs.aws.amazon.com" >> $GITHUB_ENV
+          else
+            echo "NEXT_PUBLIC_ENVIRONMENT=production" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_API_URL=https://api.cloudwatch-apm-docs.aws.amazon.com" >> $GITHUB_ENV
+          fi
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets[format('COGNITO_USER_POOL_ID_{0}', upper(matrix.environment))] }}
+          NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets[format('COGNITO_USER_POOL_CLIENT_ID_{0}', upper(matrix.environment))] }}
+          NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID: ${{ secrets[format('COGNITO_IDENTITY_POOL_ID_{0}', upper(matrix.environment))] }}
+          NEXT_PUBLIC_COGNITO_DOMAIN: ${{ secrets[format('COGNITO_DOMAIN_{0}', upper(matrix.environment))] }}
+          NEXT_PUBLIC_AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ matrix.environment }}
+          path: |
+            .next/
+            public/
+            package.json
+          retention-days: 7
+
+  # Deploy to staging (on staging branch or PR)
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/staging' || github.event_name == 'pull_request'
+    environment:
+      name: staging
+      url: https://staging-docs.cloudwatch-apm.aws.amazon.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-staging
+
+      - name: Tag deployment for rollback tracking
+        run: |
+          # Tag S3 objects with deployment metadata for rollback capability
+          COMMIT_SHA="${{ github.sha }}"
+          BUILD_NUMBER="${{ github.run_number }}"
+          BRANCH_NAME="${{ github.ref_name }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "DEPLOYMENT_TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+
+      - name: Deploy to S3 with versioning
+        run: |
+          # Enable versioning on S3 bucket for rollback capability
+          aws s3api put-bucket-versioning \
+            --bucket ${{ secrets.S3_BUCKET_STAGING }} \
+            --versioning-configuration Status=Enabled
+          
+          # Sync build files to S3 bucket with metadata
+          aws s3 sync .next/static s3://${{ secrets.S3_BUCKET_STAGING }}/_next/static \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --metadata "commit=${{ env.COMMIT_SHA }},build=${{ env.BUILD_NUMBER }},branch=${{ env.BRANCH_NAME }},timestamp=${{ env.DEPLOYMENT_TIMESTAMP }}"
+          
+          aws s3 sync .next s3://${{ secrets.S3_BUCKET_STAGING }}/_next \
+            --exclude "static/*" \
+            --delete \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --metadata "commit=${{ env.COMMIT_SHA }},build=${{ env.BUILD_NUMBER }},branch=${{ env.BRANCH_NAME }},timestamp=${{ env.DEPLOYMENT_TIMESTAMP }}"
+          
+          aws s3 sync public s3://${{ secrets.S3_BUCKET_STAGING }} \
+            --delete \
+            --cache-control "public, max-age=86400" \
+            --metadata "commit=${{ env.COMMIT_SHA }},build=${{ env.BUILD_NUMBER }},branch=${{ env.BRANCH_NAME }},timestamp=${{ env.DEPLOYMENT_TIMESTAMP }}"
+          
+          # Tag the main index.html for easy rollback identification
+          aws s3api put-object-tagging \
+            --bucket ${{ secrets.S3_BUCKET_STAGING }} \
+            --key index.html \
+            --tagging "TagSet=[{Key=commit,Value=${{ env.COMMIT_SHA }}},{Key=build,Value=${{ env.BUILD_NUMBER }}},{Key=branch,Value=${{ env.BRANCH_NAME }}},{Key=timestamp,Value=${{ env.DEPLOYMENT_TIMESTAMP }}}]"
+
+      - name: Invalidate CloudFront
+        run: |
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }} \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          
+          echo "INVALIDATION_ID=$INVALIDATION_ID" >> $GITHUB_ENV
+          echo "CloudFront invalidation created: $INVALIDATION_ID"
+
+      - name: Wait for CloudFront invalidation
+        run: |
+          echo "Waiting for CloudFront invalidation to complete..."
+          aws cloudfront wait invalidation-completed \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }} \
+            --id ${{ env.INVALIDATION_ID }}
+          echo "CloudFront invalidation completed"
+
+      - name: Run comprehensive smoke tests
+        run: |
+          # Wait for deployment to propagate
+          sleep 30
+          
+          # Test critical endpoints
+          ENDPOINTS=(
+            "/"
+            "/health"
+            "/getting-started"
+            "/configuration"
+            "/examples"
+            "/api"
+          )
+          
+          for endpoint in "${ENDPOINTS[@]}"; do
+            echo "Testing endpoint: $endpoint"
+            if curl -f -s "https://staging-docs.cloudwatch-apm.aws.amazon.com$endpoint" > /dev/null; then
+              echo "✅ $endpoint is accessible"
+            else
+              echo "❌ $endpoint failed"
+              exit 1
+            fi
+          done
+          
+          # Test that static assets are loading
+          if curl -f -s "https://staging-docs.cloudwatch-apm.aws.amazon.com/_next/static/" > /dev/null; then
+            echo "✅ Static assets are accessible"
+          else
+            echo "❌ Static assets failed"
+            exit 1
+          fi
+
+      - name: Run content validation on deployed site
+        run: |
+          # Install dependencies for validation
+          npm ci
+          
+          # Run link validation against deployed site
+          SITE_URL="https://staging-docs.cloudwatch-apm.aws.amazon.com" npm run validate:deployed-links || echo "Link validation warnings detected"
+
+      - name: Comment on PR with deployment details
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentInfo = `
+            ## 🚀 Staging Deployment Complete!
+            
+            **Preview URL:** https://staging-docs.cloudwatch-apm.aws.amazon.com
+            
+            **Deployment Details:**
+            - **Commit:** \`${{ env.COMMIT_SHA }}\`
+            - **Build:** #${{ env.BUILD_NUMBER }}
+            - **Branch:** ${{ env.BRANCH_NAME }}
+            - **Timestamp:** ${{ env.DEPLOYMENT_TIMESTAMP }}
+            
+            **Quick Links:**
+            - [Home Page](https://staging-docs.cloudwatch-apm.aws.amazon.com/)
+            - [Getting Started](https://staging-docs.cloudwatch-apm.aws.amazon.com/getting-started)
+            - [Configuration](https://staging-docs.cloudwatch-apm.aws.amazon.com/configuration)
+            - [Examples](https://staging-docs.cloudwatch-apm.aws.amazon.com/examples)
+            
+            **Rollback Command:**
+            \`\`\`bash
+            node scripts/rollback.js staging --version ${{ env.COMMIT_SHA }}
+            \`\`\`
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: deploymentInfo
+            })
+
+  # Deploy to production (on main branch)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://docs.cloudwatch-apm.aws.amazon.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-production
+
+      - name: Tag deployment for rollback tracking
+        run: |
+          # Tag S3 objects with deployment metadata for rollback capability
+          COMMIT_SHA="${{ github.sha }}"
+          BUILD_NUMBER="${{ github.run_number }}"
+          BRANCH_NAME="${{ github.ref_name }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "DEPLOYMENT_TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+
+      - name: Create pre-deployment backup
+        run: |
+          # Create backup of current production deployment
+          BACKUP_PREFIX="backups/production/$(date -u +%Y-%m-%d-%H-%M-%S)/"
+          
+          echo "Creating backup at: $BACKUP_PREFIX"
+          aws s3 sync s3://${{ secrets.S3_BUCKET_PRODUCTION }}/ s3://${{ secrets.S3_BUCKET_PRODUCTION }}/$BACKUP_PREFIX \
+            --exclude "backups/*" \
+            --quiet
+          
+          echo "BACKUP_PREFIX=$BACKUP_PREFIX" >> $GITHUB_ENV
+          echo "Production backup created at: $BACKUP_PREFIX"
+
+      - name: Deploy to S3 with versioning
+        run: |
+          # Enable versioning on S3 bucket for rollback capability
+          aws s3api put-bucket-versioning \
+            --bucket ${{ secrets.S3_BUCKET_PRODUCTION }} \
+            --versioning-configuration Status=Enabled
+          
+          # Sync build files to S3 bucket with metadata
+          aws s3 sync .next/static s3://${{ secrets.S3_BUCKET_PRODUCTION }}/_next/static \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --metadata "commit=${{ env.COMMIT_SHA }},build=${{ env.BUILD_NUMBER }},branch=${{ env.BRANCH_NAME }},timestamp=${{ env.DEPLOYMENT_TIMESTAMP }}"
+          
+          aws s3 sync .next s3://${{ secrets.S3_BUCKET_PRODUCTION }}/_next \
+            --exclude "static/*" \
+            --delete \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --metadata "commit=${{ env.COMMIT_SHA }},build=${{ env.BUILD_NUMBER }},branch=${{ env.BRANCH_NAME }},timestamp=${{ env.DEPLOYMENT_TIMESTAMP }}"
+          
+          aws s3 sync public s3://${{ secrets.S3_BUCKET_PRODUCTION }} \
+            --delete \
+            --cache-control "public, max-age=86400" \
+            --metadata "commit=${{ env.COMMIT_SHA }},build=${{ env.BUILD_NUMBER }},branch=${{ env.BRANCH_NAME }},timestamp=${{ env.DEPLOYMENT_TIMESTAMP }}"
+          
+          # Tag the main index.html for easy rollback identification
+          aws s3api put-object-tagging \
+            --bucket ${{ secrets.S3_BUCKET_PRODUCTION }} \
+            --key index.html \
+            --tagging "TagSet=[{Key=commit,Value=${{ env.COMMIT_SHA }}},{Key=build,Value=${{ env.BUILD_NUMBER }}},{Key=branch,Value=${{ env.BRANCH_NAME }}},{Key=timestamp,Value=${{ env.DEPLOYMENT_TIMESTAMP }}}]"
+
+      - name: Invalidate CloudFront
+        run: |
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION }} \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          
+          echo "INVALIDATION_ID=$INVALIDATION_ID" >> $GITHUB_ENV
+          echo "CloudFront invalidation created: $INVALIDATION_ID"
+
+      - name: Wait for CloudFront invalidation
+        run: |
+          echo "Waiting for CloudFront invalidation to complete..."
+          aws cloudfront wait invalidation-completed \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION }} \
+            --id ${{ env.INVALIDATION_ID }}
+          echo "CloudFront invalidation completed"
+
+      - name: Run comprehensive smoke tests
+        run: |
+          # Wait for deployment to propagate
+          sleep 60
+          
+          # Test critical endpoints
+          ENDPOINTS=(
+            "/"
+            "/health"
+            "/getting-started"
+            "/configuration"
+            "/examples"
+            "/api"
+            "/troubleshooting"
+            "/monitoring"
+            "/security"
+            "/performance"
+          )
+          
+          echo "Running comprehensive smoke tests..."
+          FAILED_ENDPOINTS=()
+          
+          for endpoint in "${ENDPOINTS[@]}"; do
+            echo "Testing endpoint: $endpoint"
+            if curl -f -s -m 30 "https://docs.cloudwatch-apm.aws.amazon.com$endpoint" > /dev/null; then
+              echo "✅ $endpoint is accessible"
+            else
+              echo "❌ $endpoint failed"
+              FAILED_ENDPOINTS+=("$endpoint")
+            fi
+          done
+          
+          # Test that static assets are loading
+          if curl -f -s -m 30 "https://docs.cloudwatch-apm.aws.amazon.com/_next/static/" > /dev/null; then
+            echo "✅ Static assets are accessible"
+          else
+            echo "❌ Static assets failed"
+            FAILED_ENDPOINTS+=("/_next/static/")
+          fi
+          
+          # Test search functionality
+          if curl -f -s -m 30 "https://docs.cloudwatch-apm.aws.amazon.com/api/search?q=test" > /dev/null; then
+            echo "✅ Search API is accessible"
+          else
+            echo "⚠️ Search API may not be available (non-critical)"
+          fi
+          
+          # Fail if any critical endpoints failed
+          if [ ${#FAILED_ENDPOINTS[@]} -gt 0 ]; then
+            echo "❌ Critical endpoints failed: ${FAILED_ENDPOINTS[*]}"
+            echo "Deployment verification failed - consider rollback"
+            exit 1
+          fi
+          
+          echo "✅ All smoke tests passed"
+
+      - name: Run content validation on deployed site
+        run: |
+          # Install dependencies for validation
+          npm ci
+          
+          # Run link validation against deployed site
+          SITE_URL="https://docs.cloudwatch-apm.aws.amazon.com" npm run validate:deployed-links || echo "Link validation warnings detected"
+          
+          # Run accessibility validation
+          npm run validate:accessibility || echo "Accessibility warnings detected"
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Production deployment successful!"
+          echo "Site URL: https://docs.cloudwatch-apm.aws.amazon.com"
+          echo "Commit: ${{ env.COMMIT_SHA }}"
+          echo "Build: #${{ env.BUILD_NUMBER }}"
+          echo "Backup: ${{ env.BACKUP_PREFIX }}"
+          
+          # Send success notification (could integrate with Slack, Teams, etc.)
+          echo "Deployment completed successfully at $(date -u)"
+
+      - name: Create deployment record
+        if: success()
+        run: |
+          # Create a deployment record for tracking
+          cat > deployment-record.json << EOF
+          {
+            "environment": "production",
+            "commit": "${{ env.COMMIT_SHA }}",
+            "build": "${{ env.BUILD_NUMBER }}",
+            "branch": "${{ env.BRANCH_NAME }}",
+            "timestamp": "${{ env.DEPLOYMENT_TIMESTAMP }}",
+            "backup": "${{ env.BACKUP_PREFIX }}",
+            "status": "success",
+            "url": "https://docs.cloudwatch-apm.aws.amazon.com"
+          }
+          EOF
+          
+          # Store deployment record in S3
+          aws s3 cp deployment-record.json s3://${{ secrets.S3_BUCKET_PRODUCTION }}/deployments/${{ env.COMMIT_SHA }}.json
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Production deployment failed!"
+          echo "Backup available at: ${{ env.BACKUP_PREFIX }}"
+          echo "Consider running rollback: node scripts/rollback.js production"
+          
+          # Create failure record
+          cat > deployment-failure.json << EOF
+          {
+            "environment": "production",
+            "commit": "${{ env.COMMIT_SHA }}",
+            "build": "${{ env.BUILD_NUMBER }}",
+            "branch": "${{ env.BRANCH_NAME }}",
+            "timestamp": "${{ env.DEPLOYMENT_TIMESTAMP }}",
+            "backup": "${{ env.BACKUP_PREFIX }}",
+            "status": "failed",
+            "rollback_command": "node scripts/rollback.js production"
+          }
+          EOF
+          
+          # Store failure record
+          aws s3 cp deployment-failure.json s3://${{ secrets.S3_BUCKET_PRODUCTION }}/deployments/failed-${{ env.COMMIT_SHA }}.json
+          
+          exit 1
+
+  # Rollback capability
+  rollback:
+    name: Emergency Rollback
+    runs-on: ubuntu-latest
+    if: failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')
+    needs: [deploy-staging, deploy-production]
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ github.ref == 'refs/heads/main' && secrets.AWS_ACCESS_KEY_ID_PRODUCTION || secrets.AWS_ACCESS_KEY_ID_STAGING }}
+          aws-secret-access-key: ${{ github.ref == 'refs/heads/main' && secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION || secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js for rollback script
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Determine rollback environment
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "ROLLBACK_ENV=production" >> $GITHUB_ENV
+            echo "BUCKET_NAME=${{ secrets.S3_BUCKET_PRODUCTION }}" >> $GITHUB_ENV
+            echo "DISTRIBUTION_ID=${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION }}" >> $GITHUB_ENV
+            echo "SITE_URL=https://docs.cloudwatch-apm.aws.amazon.com" >> $GITHUB_ENV
+          else
+            echo "ROLLBACK_ENV=staging" >> $GITHUB_ENV
+            echo "BUCKET_NAME=${{ secrets.S3_BUCKET_STAGING }}" >> $GITHUB_ENV
+            echo "DISTRIBUTION_ID=${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }}" >> $GITHUB_ENV
+            echo "SITE_URL=https://staging-docs.cloudwatch-apm.aws.amazon.com" >> $GITHUB_ENV
+          fi
+
+      - name: Get previous deployment version
+        run: |
+          echo "🔍 Finding previous deployment version..."
+          
+          # Get the second most recent version (previous deployment)
+          PREVIOUS_VERSION=$(aws s3api list-object-versions \
+            --bucket ${{ env.BUCKET_NAME }} \
+            --prefix index.html \
+            --query 'Versions[1].VersionId' \
+            --output text)
+          
+          if [ "$PREVIOUS_VERSION" = "None" ] || [ -z "$PREVIOUS_VERSION" ]; then
+            echo "❌ No previous version found for rollback"
+            exit 1
+          fi
+          
+          echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
+          echo "📋 Previous version identified: $PREVIOUS_VERSION"
+
+      - name: Perform emergency rollback
+        run: |
+          echo "🚨 Performing emergency rollback for ${{ env.ROLLBACK_ENV }}..."
+          echo "Rolling back to version: ${{ env.PREVIOUS_VERSION }}"
+          
+          # Set environment variables for rollback script
+          export S3_BUCKET_STAGING="${{ secrets.S3_BUCKET_STAGING }}"
+          export S3_BUCKET_PRODUCTION="${{ secrets.S3_BUCKET_PRODUCTION }}"
+          export CLOUDFRONT_DISTRIBUTION_ID_STAGING="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }}"
+          export CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION }}"
+          
+          # Run rollback script with force flag (no confirmation in CI)
+          node scripts/rollback.js ${{ env.ROLLBACK_ENV }} --version ${{ env.PREVIOUS_VERSION }} --force
+
+      - name: Verify rollback success
+        run: |
+          echo "🔍 Verifying rollback success..."
+          
+          # Wait for rollback to propagate
+          sleep 60
+          
+          # Test critical endpoints
+          ENDPOINTS=("/" "/health" "/getting-started")
+          FAILED_TESTS=0
+          
+          for endpoint in "${ENDPOINTS[@]}"; do
+            echo "Testing endpoint: $endpoint"
+            if curl -f -s -m 30 "${{ env.SITE_URL }}$endpoint" > /dev/null; then
+              echo "✅ $endpoint is accessible after rollback"
+            else
+              echo "❌ $endpoint failed after rollback"
+              FAILED_TESTS=$((FAILED_TESTS + 1))
+            fi
+          done
+          
+          if [ $FAILED_TESTS -gt 0 ]; then
+            echo "⚠️ Some endpoints failed after rollback, but rollback completed"
+            echo "Manual intervention may be required"
+          else
+            echo "✅ Rollback verification successful"
+          fi
+
+      - name: Create rollback notification
+        run: |
+          echo "📢 Creating rollback notification..."
+          
+          cat > rollback-notification.json << EOF
+          {
+            "event": "emergency_rollback",
+            "environment": "${{ env.ROLLBACK_ENV }}",
+            "trigger": "deployment_failure",
+            "previous_commit": "${{ github.sha }}",
+            "rollback_version": "${{ env.PREVIOUS_VERSION }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "site_url": "${{ env.SITE_URL }}",
+            "status": "completed"
+          }
+          EOF
+          
+          # Store rollback record
+          aws s3 cp rollback-notification.json s3://${{ env.BUCKET_NAME }}/rollbacks/$(date -u +%Y-%m-%d-%H-%M-%S).json
+          
+          echo "🚨 EMERGENCY ROLLBACK COMPLETED"
+          echo "Environment: ${{ env.ROLLBACK_ENV }}"
+          echo "Site URL: ${{ env.SITE_URL }}"
+          echo "Rollback Version: ${{ env.PREVIOUS_VERSION }}"
+          echo "Failed Deployment: ${{ github.sha }}"
+
+      - name: Comment on commit with rollback info
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const rollbackInfo = `
+            ## 🚨 Emergency Rollback Performed
+            
+            **Environment:** ${{ env.ROLLBACK_ENV }}
+            **Site URL:** ${{ env.SITE_URL }}
+            **Rollback Version:** \`${{ env.PREVIOUS_VERSION }}\`
+            **Failed Deployment:** \`${{ github.sha }}\`
+            **Timestamp:** $(date -u)
+            
+            The deployment failed and an automatic rollback was performed to restore service.
+            
+            **Next Steps:**
+            1. Investigate the deployment failure
+            2. Fix the issues in a new commit
+            3. Test thoroughly before redeploying
+            
+            **Manual Rollback Command:**
+            \`\`\`bash
+            node scripts/rollback.js ${{ env.ROLLBACK_ENV }} --version ${{ env.PREVIOUS_VERSION }}
+            \`\`\`
+            `;
+            
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: rollbackInfo
+            })
