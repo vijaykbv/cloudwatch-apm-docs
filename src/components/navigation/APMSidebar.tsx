@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 type APMSection = 
   | 'overview'
@@ -155,9 +154,9 @@ export const APMSidebar: React.FC<APMSidebarProps> = ({
           {hasChildren && !isCollapsed && (
             <div className="flex-shrink-0 ml-2">
               {isExpanded ? (
-                <ChevronDownIcon className="w-4 h-4" />
+                <span className="text-xs">▼</span>
               ) : (
-                <ChevronRightIcon className="w-4 h-4" />
+                <span className="text-xs">▶</span>
               )}
             </div>
           )}
@@ -190,14 +189,7 @@ export const APMSidebar: React.FC<APMSidebarProps> = ({
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <svg 
-                className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
+              <span className="text-sm">{isCollapsed ? '→' : '←'}</span>
             </button>
           )}
         </div>

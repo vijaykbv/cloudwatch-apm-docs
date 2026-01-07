@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { PlayIcon, StopIcon, CogIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface InstrumentationTarget {
   id: string;
@@ -99,7 +98,6 @@ export const DynamicInstrumentationGuide: React.FC = () => {
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center mb-3">
-            <PlayIcon className="w-6 h-6 text-green-600 mr-2" />
             <h3 className="text-lg font-semibold">Instant Activation</h3>
           </div>
           <p className="text-gray-600">
@@ -109,7 +107,6 @@ export const DynamicInstrumentationGuide: React.FC = () => {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center mb-3">
-            <CogIcon className="w-6 h-6 text-blue-600 mr-2" />
             <h3 className="text-lg font-semibold">Runtime Control</h3>
           </div>
           <p className="text-gray-600">
@@ -119,7 +116,6 @@ export const DynamicInstrumentationGuide: React.FC = () => {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center mb-3">
-            <ChartBarIcon className="w-6 h-6 text-purple-600 mr-2" />
             <h3 className="text-lg font-semibold">Targeted Insights</h3>
           </div>
           <p className="text-gray-600">
@@ -224,28 +220,26 @@ export const DynamicInstrumentationGuide: React.FC = () => {
                     </select>
                   </div>
 
-                  <button
-                    onClick={() => handleInstrument(selectedTarget)}
-                    disabled={isInstrumenting}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center"
-                  >
-                    {isInstrumenting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Instrumenting...
-                      </>
-                    ) : (
-                      <>
-                        <PlayIcon className="w-4 h-4 mr-2" />
-                        Start Instrumentation
-                      </>
-                    )}
-                  </button>
+                    <button
+                      onClick={() => handleInstrument(selectedTarget)}
+                      disabled={isInstrumenting}
+                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center"
+                    >
+                      {isInstrumenting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Instrumenting...
+                        </>
+                      ) : (
+                        <>
+                          Start Instrumentation
+                        </>
+                      )}
+                    </button>
                 </div>
               </div>
             ) : (
               <div className="border border-gray-200 rounded-lg p-8 text-center text-gray-500">
-                <CogIcon className="w-12 h-12 mx-auto mb-3 text-gray-400" />
                 <p>Select a target to configure instrumentation</p>
               </div>
             )}

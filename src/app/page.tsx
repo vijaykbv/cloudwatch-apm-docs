@@ -11,7 +11,6 @@ import PerformanceMetricsDisplay from '@/components/performance/PerformanceMetri
 import { InteractiveAPIExplorer } from '@/components/api/InteractiveAPIExplorer';
 import { MigrationWizard } from '@/components/migration/MigrationWizard';
 import { CodeExampleBrowser } from '@/components/examples/CodeExampleBrowser';
-import { ArrowRightIcon, PlayIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 type APMSection = 
   | 'overview'
@@ -237,16 +236,14 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={() => onSectionChange('dynamic-instrumentation')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
           >
-            <PlayIcon className="w-5 h-5 mr-2" />
             Start with Dynamic Instrumentation
           </button>
           <button
             onClick={() => onSectionChange('agentic-instrumentation')}
-            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 flex items-center justify-center"
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700"
           >
-            <SparklesIcon className="w-5 h-5 mr-2" />
             Try AI-Powered APM
           </button>
         </div>
@@ -264,7 +261,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
             Start collecting metrics instantly.
           </p>
           <div className="flex items-center text-blue-600 font-medium">
-            Learn more <ArrowRightIcon className="w-4 h-4 ml-1" />
+            Learn more
           </div>
         </div>
 
@@ -278,7 +275,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
             performance issues before they impact users.
           </p>
           <div className="flex items-center text-purple-600 font-medium">
-            Explore AI features <ArrowRightIcon className="w-4 h-4 ml-1" />
+            Explore AI features
           </div>
         </div>
 
@@ -292,7 +289,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
             cleanup, and cost-aware configurations.
           </p>
           <div className="flex items-center text-green-600 font-medium">
-            Calculate savings <ArrowRightIcon className="w-4 h-4 ml-1" />
+            Calculate savings
           </div>
         </div>
       </div>

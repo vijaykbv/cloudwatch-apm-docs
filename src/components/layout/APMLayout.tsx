@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import APMSidebar from '../navigation/APMSidebar';
-import { MagnifyingGlassIcon, BellIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 type APMSection = 
   | 'overview'
@@ -105,9 +104,7 @@ export const APMLayout: React.FC<APMLayoutProps> = ({
                     </li>
                     {getBreadcrumbs(currentSection).map((crumb, index) => (
                       <li key={index} className="flex items-center">
-                        <svg className="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        </svg>
+                        <span className="text-xs">›</span>
                         <span className={index === getBreadcrumbs(currentSection).length - 1 ? 'text-gray-900 font-medium' : ''}>
                           {crumb}
                         </span>
@@ -124,27 +121,24 @@ export const APMLayout: React.FC<APMLayoutProps> = ({
               <div className="flex items-center space-x-4 ml-6">
                 {/* Search */}
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                  </div>
                   <input
                     type="text"
                     placeholder="Search documentation..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-64 pl-3 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 {/* Notifications */}
                 <button className="p-2 text-gray-400 hover:text-gray-500 relative">
-                  <BellIcon className="h-6 w-6" />
+                  <span className="text-sm">Notifications</span>
                   <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400"></span>
                 </button>
 
                 {/* User Menu */}
                 <button className="p-2 text-gray-400 hover:text-gray-500">
-                  <UserCircleIcon className="h-6 w-6" />
+                  <span className="text-sm">User</span>
                 </button>
               </div>
             </div>

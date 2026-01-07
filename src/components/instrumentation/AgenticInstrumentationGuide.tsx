@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { SparklesIcon, CpuChipIcon, LightBulbIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface AIRecommendation {
   id: string;
@@ -192,7 +191,6 @@ export const AgenticInstrumentationGuide: React.FC = () => {
               </>
             ) : (
               <>
-                <SparklesIcon className="w-4 h-4 mr-2" />
                 Run AI Analysis
               </>
             )}
