@@ -401,8 +401,8 @@ export const CostOptimizationCalculator: React.FC<CostOptimizationCalculatorProp
                         <p className="text-sm text-gray-600 mt-1">{rec.description}</p>
                         <div className="flex items-center gap-4 mt-2 text-xs">
                           <span className="capitalize">{rec.type.replace('-', ' ')}</span>
-                          <span className={`font-medium ${getComplexityColor(rec.complexity)}`}>
-                            {rec.complexity} complexity
+                          <span className={`font-medium ${getComplexityColor(rec.effort)}`}>
+                            {rec.effort} complexity
                           </span>
                           <span className={`font-medium ${getRiskColor(rec.risk)}`}>
                             {rec.risk} risk

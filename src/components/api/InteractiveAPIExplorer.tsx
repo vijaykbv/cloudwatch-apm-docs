@@ -97,7 +97,7 @@ export function InteractiveAPIExplorer({
     } else if (path === '/applications' && method === 'post') {
       return {
         ApplicationArn: 'arn:aws:application-insights:us-east-1:123456789012:application/new-app',
-        ApplicationName: explorerState.requestBody?.ApplicationName || 'new-app'
+        ApplicationName: (explorerState.requestBody as any)?.ApplicationName || 'new-app'
       }
     } else if (path.includes('/traces') && method === 'get') {
       return {

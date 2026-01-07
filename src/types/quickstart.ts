@@ -118,7 +118,7 @@ export const ConfigurationTemplateSchema = z.object({
   description: z.string().min(1),
   platforms: z.array(z.string()),
   useCase: z.string().min(1),
-  configuration: z.record(z.unknown()),
+  configuration: z.record(z.string(), z.unknown()),
   examples: z.array(z.object({
     id: z.string().min(1),
     title: z.string().min(1),

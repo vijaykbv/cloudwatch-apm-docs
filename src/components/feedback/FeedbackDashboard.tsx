@@ -219,8 +219,8 @@ export function FeedbackDashboard({ pageId, sectionId, className = '' }: Feedbac
               onDelete={handleDeleteFeedback}
               onVote={handleVoteFeedback}
               onAssign={handleAssignFeedback}
-              currentUserId={user.id}
-              canModerate={canModerate}
+              currentUserId={user.sub}
+              canModerate={canModerate || false}
             />
           )}
 

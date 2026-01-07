@@ -225,17 +225,23 @@ export function CommentSystem({ pageId, sectionId, className = '' }: CommentSyst
             </div>
           ) : (
             threads.map((thread) => (
-              <CommentThread
-                key={thread.id}
-                thread={thread}
-                currentUser={user}
-                onReply={handleReply}
-                onUpdate={handleUpdate}
-                onDelete={handleDelete}
-                onResolve={handleResolve}
-                onReaction={handleReaction}
-                className="border-b border-gray-200 pb-6 last:border-b-0"
-              />
+              user && (
+                <CommentThread
+                  key={thread.id}
+                  thread={thread}
+                  currentUser={{
+                    id: user.sub,
+                    name: `${user.given_name} ${user.family_name}`,
+                    email: user.email,
+                    role: user.roles?.[0] || 'reviewer'
+                  }}
+                  onReply={handleReply}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                  onResolve={handleResolve}
+                  onReaction={handleReaction}
+                />
+              )
             ))
           )}
         </div>

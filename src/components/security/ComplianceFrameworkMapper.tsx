@@ -90,7 +90,7 @@ export const ComplianceFrameworkMapper: React.FC<ComplianceFrameworkMapperProps>
       'documentation': '📄',
       'test-result': '🧪'
     }
-    return icons[type] || '📎'
+    return icons[type as keyof typeof icons] || '📎'
   }
 
   const filteredControls = activeFramework?.controls.filter(control => 

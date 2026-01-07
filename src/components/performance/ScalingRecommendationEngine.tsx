@@ -273,7 +273,7 @@ export const ScalingRecommendationEngine: React.FC<ScalingRecommendationEnginePr
                           <span className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                             {index + 1}
                           </span>
-                          <h7 className="font-medium text-gray-900">{step.title}</h7>
+                          <div className="font-medium text-gray-900">{step.title}</div>
                         </div>
                         <p className="text-sm text-gray-600 mb-2 ml-8">{step.description}</p>
                         {step.commands.length > 0 && (

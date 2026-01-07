@@ -413,7 +413,7 @@ export const PerformanceMetricSchema = z.object({
   unit: MetricUnitSchema,
   value: z.number(),
   timestamp: z.date(),
-  tags: z.record(z.string()),
+  tags: z.record(z.string(), z.string()),
   context: MetricContextSchema
 })
 
@@ -441,7 +441,7 @@ export const TestConfigurationSchema = z.object({
   duration: z.number().positive(),
   concurrency: z.number().positive(),
   dataSize: z.string().min(1),
-  parameters: z.record(z.unknown())
+  parameters: z.record(z.string(), z.unknown())
 })
 
 export const PerformanceBenchmarkSchema = z.object({
@@ -471,7 +471,7 @@ export const RecommendationItemSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   type: z.enum(['infrastructure', 'configuration', 'architecture', 'monitoring']),
-  configuration: z.record(z.unknown()),
+  configuration: z.record(z.string(), z.unknown()),
   estimatedCost: CostEstimateSchema,
   complexity: ComplexitySchema
 })

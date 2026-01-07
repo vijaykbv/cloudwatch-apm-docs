@@ -402,12 +402,12 @@ export const APIInfoSchema = z.object({
   version: z.string().min(1),
   contact: z.object({
     name: z.string().optional(),
-    url: z.string().url().optional(),
-    email: z.string().email().optional()
+    url: z.string().min(1).optional(),
+    email: z.string().min(1).optional()
   }).optional(),
   license: z.object({
     name: z.string().min(1),
-    url: z.string().url().optional()
+    url: z.string().min(1).optional()
   }).optional()
 })
 
@@ -418,9 +418,9 @@ export const ServerVariableSchema = z.object({
 })
 
 export const APIServerSchema = z.object({
-  url: z.string().url(),
+  url: z.string().min(1),
   description: z.string().optional(),
-  variables: z.record(ServerVariableSchema).optional()
+  variables: z.record(z.string(), ServerVariableSchema).optional()
 })
 
 export const SchemaSchema: z.ZodType<Schema> = z.lazy(() => z.object({
@@ -429,10 +429,10 @@ export const SchemaSchema: z.ZodType<Schema> = z.lazy(() => z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   enum: z.array(z.unknown()).optional(),
-  properties: z.record(SchemaSchema).optional(),
+  properties: z.record(z.string(), z.lazy(() => SchemaSchema)).optional(),
   required: z.array(z.string()).optional(),
-  items: SchemaSchema.optional(),
-  additionalProperties: z.union([z.boolean(), SchemaSchema]).optional(),
+  items: z.lazy(() => SchemaSchema).optional(),
+  additionalProperties: z.union([z.boolean(), z.lazy(() => SchemaSchema)]).optional(),
   example: z.unknown().optional(),
   default: z.unknown().optional(),
   minimum: z.number().optional(),
@@ -454,7 +454,7 @@ export const ParameterSchema = z.object({
   deprecated: z.boolean().optional(),
   schema: SchemaSchema.optional(),
   example: z.unknown().optional(),
-  examples: z.record(z.object({
+  examples: z.record(z.string(), z.object({
     summary: z.string().optional(),
     description: z.string().optional(),
     value: z.unknown().optional(),

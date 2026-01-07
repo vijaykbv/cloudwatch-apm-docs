@@ -252,7 +252,7 @@ export const MonitoringValidation: React.FC<MonitoringValidationProps> = ({
       return check
     })
     
-    onValidationComplete?.(updatedChecks)
+    onValidationComplete?.(updatedChecks as ValidationCheck[])
   }, [checks, runValidationCheck, onValidationComplete])
 
   const updateMetrics = useCallback(() => {

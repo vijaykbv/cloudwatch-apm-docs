@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { ReviewRequest, ReviewFilter, ReviewAnalytics } from '@/types/review';
 import { ReviewService, ReviewUtils } from '@/lib/review';
 import { ReviewList } from './ReviewList';
-import { ReviewForm } from './ReviewForm';
-import { ReviewAnalyticsDashboard } from './ReviewAnalyticsDashboard';
+// import { ReviewForm } from './ReviewForm'; // TODO: Create ReviewForm component
+// import { ReviewAnalyticsDashboard } from './ReviewAnalyticsDashboard'; // TODO: Create ReviewAnalyticsDashboard component
 import { useAuth } from '@/components/auth';
 
 interface ReviewDashboardProps {
@@ -40,7 +40,7 @@ export function ReviewDashboard({ className = '' }: ReviewDashboardProps) {
       if (activeTab === 'my_reviews' && user) {
         reviewFilter = {
           ...reviewFilter,
-          assignedTo: [user.id],
+          assignedTo: [user.sub],
         };
       }
       
@@ -117,8 +117,8 @@ export function ReviewDashboard({ className = '' }: ReviewDashboardProps) {
 
   // Filter reviews for current user
   const myReviews = reviews.filter(review => 
-    review.assignedReviewers.some(reviewer => reviewer.id === user.id) ||
-    review.author.id === user.id
+    review.assignedReviewers.some(reviewer => reviewer.id === user.sub) ||
+    review.author.id === user.sub
   );
 
   const pendingReviews = myReviews.filter(review => 
@@ -217,7 +217,13 @@ export function ReviewDashboard({ className = '' }: ReviewDashboardProps) {
           {(activeTab === 'my_reviews' || activeTab === 'all_reviews') && (
             <ReviewList
               reviews={activeTab === 'my_reviews' ? myReviews : reviews}
-              currentUser={user}
+              currentUser={{
+              id: user.sub,
+              name: `${user.given_name} ${user.family_name}`,
+              email: user.email,
+              role: user.roles?.[0] || 'reviewer',
+              expertise: [user.department || 'general']
+            }}
               onUpdate={handleUpdateReview}
               onSubmitReview={handleSubmitReview}
               onApprove={handleApproveReview}
@@ -227,15 +233,20 @@ export function ReviewDashboard({ className = '' }: ReviewDashboardProps) {
           )}
 
           {activeTab === 'analytics' && analytics && canViewAnalytics && (
-            <ReviewAnalyticsDashboard analytics={analytics} />
+            <div className="p-8 text-center text-gray-500">
+              ReviewAnalyticsDashboard component not yet implemented
+            </div>
           )}
 
           {activeTab === 'create' && canCreateReview && (
             <div className="max-w-4xl">
-              <ReviewForm
+              {/* <ReviewForm
                 onSubmit={handleCreateReview}
                 onCancel={() => setActiveTab('my_reviews')}
-              />
+              /> */}
+              <div className="p-8 text-center text-gray-500">
+                ReviewForm component not yet implemented
+              </div>
             </div>
           )}
         </>

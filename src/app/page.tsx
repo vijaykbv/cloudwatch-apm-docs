@@ -1,521 +1,655 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { PrimaryNavigation } from '@/components/navigation'
-import { SearchInterface } from '@/components/search'
-import QuickStartWizard from '@/components/quickstart/QuickStartWizard'
-import { MultiLanguageCodeExample } from '@/components/examples'
-import APIDocumentationGenerator from '@/components/api/APIDocumentationGenerator'
-import TroubleshootingCenter from '@/components/troubleshooting/TroubleshootingCenter'
-import { AlertingWizard } from '@/components/monitoring'
-import SecurityChecklist from '@/components/security/SecurityChecklist'
-import PerformanceMetricsDisplay from '@/components/performance/PerformanceMetricsDisplay'
-import { MigrationWizard } from '@/components/migration'
-import ConfigurationReferenceGenerator from '@/components/configuration/ConfigurationReferenceGenerator'
-import { CostOptimizationCenter } from '@/components/cost-optimization'
-import { SearchSystem } from '@/lib/search-system'
-import { RecommendationSystem } from '@/lib/recommendation-system'
-import { analytics, getAnalytics } from '@/lib/analytics'
-import { ErrorBoundary, SearchErrorBoundary, NavigationErrorBoundary, ContentErrorBoundary } from '@/components/error/ErrorBoundary'
-import StatusIndicator from '@/components/status/StatusIndicator'
-import type { DocumentationPage, DifficultyLevel, ContentCategory } from '@/types'
+import React, { useEffect, useState } from 'react';
+import { APMLayout } from '@/components/layout/APMLayout';
+import { CostOptimizationCenter } from '@/components/cost-optimization/CostOptimizationCenter';
+import QuickStartWizard from '@/components/quickstart/QuickStartWizard';
+import TroubleshootingCenter from '@/components/troubleshooting/TroubleshootingCenter';
+import { MonitoringBestPractices } from '@/components/monitoring/MonitoringBestPractices';
+import SecurityChecklist from '@/components/security/SecurityChecklist';
+import PerformanceMetricsDisplay from '@/components/performance/PerformanceMetricsDisplay';
+import { InteractiveAPIExplorer } from '@/components/api/InteractiveAPIExplorer';
+import { MigrationWizard } from '@/components/migration/MigrationWizard';
+import { CodeExampleBrowser } from '@/components/examples/CodeExampleBrowser';
+import { ArrowRightIcon, PlayIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
-// Main application sections
-type AppSection = 
-  | 'home' 
-  | 'getting-started' 
-  | 'examples' 
-  | 'api' 
-  | 'troubleshooting' 
-  | 'monitoring' 
-  | 'security' 
-  | 'performance' 
-  | 'migration' 
-  | 'configuration'
+type APMSection = 
+  | 'overview'
+  | 'getting-started'
+  | 'instrumentation'
+  | 'dynamic-instrumentation'
+  | 'agentic-instrumentation'
+  | 'examples'
+  | 'monitoring'
+  | 'troubleshooting'
   | 'cost-optimization'
-  | 'search'
+  | 'performance'
+  | 'security'
+  | 'api-reference'
+  | 'migration'
+  | 'best-practices';
+
+// Simple Navigation Component - REMOVED (using APMLayout instead)
+
+// Dynamic Instrumentation Component
+const DynamicInstrumentationGuide: React.FC = () => {
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="mb-8">
+        <div className="flex items-center mb-4">
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+            <PlayIcon className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dynamic Instrumentation</h1>
+            <p className="text-gray-600 mt-1">
+              Add observability to your applications without code changes or deployments
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 text-sm">💡</span>
+              </div>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-900">Zero-Code Observability</h3>
+              <p className="text-sm text-blue-700 mt-1">
+                Dynamic instrumentation allows you to add tracing, metrics, and logs to running applications 
+                without modifying source code or restarting services.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center mb-3">
+            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+              <PlayIcon className="w-5 h-5 text-green-600" />
+            </div>
+            <h3 className="text-lg font-semibold">Instant Activation</h3>
+          </div>
+          <p className="text-gray-600">
+            Start collecting metrics and traces immediately without code changes or deployments.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center mb-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+              <span className="text-blue-600 text-sm">⚙️</span>
+            </div>
+            <h3 className="text-lg font-semibold">Runtime Control</h3>
+          </div>
+          <p className="text-gray-600">
+            Enable, disable, and configure instrumentation on running applications in real-time.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center mb-3">
+            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+              <span className="text-purple-600 text-sm">📊</span>
+            </div>
+            <h3 className="text-lg font-semibold">Targeted Insights</h3>
+          </div>
+          <p className="text-gray-600">
+            Focus on specific methods, classes, or endpoints that matter most to your application.
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
+        <div className="space-y-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm mr-4">
+              1
+            </div>
+            <div>
+              <h3 className="font-medium mb-2">Install the CloudWatch Agent</h3>
+              <p className="text-gray-600 mb-3">
+                Deploy the CloudWatch agent with dynamic instrumentation capabilities to your application servers.
+              </p>
+              <div className="bg-gray-50 rounded-md p-3">
+                <code className="text-sm">
+                  wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+                </code>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm mr-4">
+              2
+            </div>
+            <div>
+              <h3 className="font-medium mb-2">Configure Target Applications</h3>
+              <p className="text-gray-600">
+                Identify and register applications for dynamic instrumentation through the CloudWatch console.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm mr-4">
+              3
+            </div>
+            <div>
+              <h3 className="font-medium mb-2">Start Collecting Insights</h3>
+              <p className="text-gray-600">
+                Use the CloudWatch console or API to enable instrumentation on specific methods, classes, or endpoints.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Agentic Instrumentation Component
+const AgenticInstrumentationGuide: React.FC = () => {
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="mb-8">
+        <div className="flex items-center mb-4">
+          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+            <SparklesIcon className="w-6 h-6 text-purple-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Agentic Instrumentation</h1>
+            <p className="text-gray-600 mt-1">
+              AI-powered observability that learns, adapts, and optimizes automatically
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <SparklesIcon className="w-5 h-5 text-purple-600" />
+              </div>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-purple-900">Intelligent Automation</h3>
+              <p className="text-sm text-purple-700 mt-1">
+                Our AI agent continuously analyzes your application patterns, automatically adjusts instrumentation, 
+                and provides intelligent recommendations to optimize performance and reduce costs.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
+          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <span className="text-blue-600 text-lg">🧠</span>
+          </div>
+          <h3 className="font-semibold mb-2">Pattern Recognition</h3>
+          <p className="text-sm text-gray-600">
+            Identifies performance patterns and anomalies across your entire application stack
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
+          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <span className="text-yellow-600 text-lg">💡</span>
+          </div>
+          <h3 className="font-semibold mb-2">Smart Recommendations</h3>
+          <p className="text-sm text-gray-600">
+            Provides actionable insights with estimated impact and implementation effort
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
+          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <SparklesIcon className="w-6 h-6 text-purple-600" />
+          </div>
+          <h3 className="font-semibold mb-2">Auto-Optimization</h3>
+          <p className="text-sm text-gray-600">
+            Automatically adjusts sampling rates and configurations based on learned patterns
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
+          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <span className="text-green-600 text-lg">📈</span>
+          </div>
+          <h3 className="font-semibold mb-2">Predictive Insights</h3>
+          <p className="text-sm text-gray-600">
+            Forecasts potential issues and suggests proactive instrumentation changes
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-xl font-semibold mb-4">AI-Powered Benefits</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="font-medium mb-3">Cost Optimization</h3>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>• Reduce monitoring costs by up to 90%</li>
+              <li>• Intelligent sampling rate optimization</li>
+              <li>• Automatic cleanup of unused metrics</li>
+              <li>• ROI-based feature recommendations</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-medium mb-3">Performance Enhancement</h3>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>• Proactive issue detection</li>
+              <li>• Automated performance tuning</li>
+              <li>• Predictive scaling recommendations</li>
+              <li>• Real-time optimization adjustments</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// APM Overview Component
+const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> = ({ onSectionChange }) => {
+  return (
+    <div className="max-w-6xl mx-auto p-6">
+      {/* Hero Section */}
+      <div className="text-center mb-12">
+        <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <span className="text-3xl">📊</span>
+        </div>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          CloudWatch Application Performance Monitoring
+        </h1>
+        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          Gain deep insights into your applications with intelligent instrumentation, 
+          cost-optimized monitoring, and AI-powered recommendations.
+        </p>
+        
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            onClick={() => onSectionChange('dynamic-instrumentation')}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+          >
+            <PlayIcon className="w-5 h-5 mr-2" />
+            Start with Dynamic Instrumentation
+          </button>
+          <button
+            onClick={() => onSectionChange('agentic-instrumentation')}
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 flex items-center justify-center"
+          >
+            <SparklesIcon className="w-5 h-5 mr-2" />
+            Try AI-Powered APM
+          </button>
+        </div>
+      </div>
+
+      {/* Key Features */}
+      <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div 
+          className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => onSectionChange('dynamic-instrumentation')}
+        >
+          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <PlayIcon className="w-6 h-6 text-blue-600" />
+          </div>
+          <h3 className="text-xl font-semibold mb-3">Dynamic Instrumentation</h3>
+          <p className="text-gray-600 mb-4">
+            Add observability to running applications without code changes or deployments. 
+            Start collecting metrics instantly.
+          </p>
+          <div className="flex items-center text-blue-600 font-medium">
+            Learn more <ArrowRightIcon className="w-4 h-4 ml-1" />
+          </div>
+        </div>
+
+        <div 
+          className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => onSectionChange('agentic-instrumentation')}
+        >
+          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+            <SparklesIcon className="w-6 h-6 text-purple-600" />
+          </div>
+          <h3 className="text-xl font-semibold mb-3">AI-Powered Optimization</h3>
+          <p className="text-gray-600 mb-4">
+            Let AI automatically optimize your instrumentation, reduce costs, and identify 
+            performance issues before they impact users.
+          </p>
+          <div className="flex items-center text-purple-600 font-medium">
+            Explore AI features <ArrowRightIcon className="w-4 h-4 ml-1" />
+          </div>
+        </div>
+
+        <div 
+          className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => onSectionChange('cost-optimization')}
+        >
+          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+            <span className="text-green-600 text-xl">💰</span>
+          </div>
+          <h3 className="text-xl font-semibold mb-3">Cost Optimization</h3>
+          <p className="text-gray-600 mb-4">
+            Reduce monitoring costs by up to 90% with intelligent sampling, automated 
+            cleanup, and cost-aware configurations.
+          </p>
+          <div className="flex items-center text-green-600 font-medium">
+            Calculate savings <ArrowRightIcon className="w-4 h-4 ml-1" />
+          </div>
+        </div>
+      </div>
+
+      {/* Getting Started Journey */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8 mb-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          Your APM Implementation Journey
+        </h2>
+        
+        <div className="grid md:grid-cols-4 gap-6">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-3">
+              1
+            </div>
+            <h3 className="font-semibold mb-2">Choose Your Path</h3>
+            <p className="text-sm text-gray-600">
+              Start with Dynamic Instrumentation for immediate insights or AI-powered for intelligent automation
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-3">
+              2
+            </div>
+            <h3 className="font-semibold mb-2">Instrument Applications</h3>
+            <p className="text-sm text-gray-600">
+              Add observability to your applications with zero-code or AI-guided instrumentation
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-3">
+              3
+            </div>
+            <h3 className="font-semibold mb-2">Optimize & Monitor</h3>
+            <p className="text-sm text-gray-600">
+              Use cost optimization tools and performance insights to maximize value
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-3">
+              4
+            </div>
+            <h3 className="font-semibold mb-2">Scale & Improve</h3>
+            <p className="text-sm text-gray-600">
+              Leverage examples, best practices, and advanced features for enterprise scale
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button
+          onClick={() => onSectionChange('examples')}
+          className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
+        >
+          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+            <span className="text-lg">💻</span>
+          </div>
+          <h3 className="font-semibold mb-1">Code Examples</h3>
+          <p className="text-sm text-gray-600">Ready-to-use implementation examples</p>
+        </button>
+
+        <button
+          onClick={() => onSectionChange('troubleshooting')}
+          className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
+        >
+          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+            <span className="text-lg">🔧</span>
+          </div>
+          <h3 className="font-semibold mb-1">Troubleshooting</h3>
+          <p className="text-sm text-gray-600">Solve common APM issues quickly</p>
+        </button>
+
+        <button
+          onClick={() => onSectionChange('api-reference')}
+          className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
+        >
+          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+            <span className="text-lg">📚</span>
+          </div>
+          <h3 className="font-semibold mb-1">API Reference</h3>
+          <p className="text-sm text-gray-600">Complete API documentation</p>
+        </button>
+
+        <button
+          onClick={() => onSectionChange('migration')}
+          className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
+        >
+          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+            <span className="text-lg">🔄</span>
+          </div>
+          <h3 className="font-semibold mb-1">Migration Guide</h3>
+          <p className="text-sm text-gray-600">Migrate from other APM solutions</p>
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function Home() {
-  const [currentSection, setCurrentSection] = useState<AppSection>('home')
-  const [searchSystem] = useState(() => new SearchSystem())
-  const [recommendationSystem] = useState(() => new RecommendationSystem())
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [analyticsService] = useState(() => getAnalytics({
-    enabled: true,
-    enableDebugLogging: process.env.NODE_ENV === 'development'
-  }))
-
-  // Initialize systems on mount
-  useEffect(() => {
-    initializeSystems()
-  }, [])
+  const [currentSection, setCurrentSection] = useState<APMSection>('overview');
 
   const initializeSystems = async () => {
-    try {
-      setError(null)
-      
-      // Initialize search system with sample documentation pages
-      const samplePages: DocumentationPage[] = [
-        {
-          id: 'quick-start',
-          title: 'Quick Start Guide',
-          description: 'Get started with CloudWatch APM in minutes',
-          audience: [{ type: 'developer', experience: 'beginner' }],
-          difficulty: 'beginner' as DifficultyLevel,
-          category: 'getting-started' as ContentCategory,
-          tags: ['quickstart', 'setup', 'installation'],
-          content: [{ type: 'text', content: 'Quick start guide content', metadata: {} }],
-          relatedPages: ['installation', 'configuration'],
-          lastUpdated: new Date(),
-          estimatedReadTime: 5
-        },
-        {
-          id: 'api-reference',
-          title: 'API Reference',
-          description: 'Complete API documentation for CloudWatch APM',
-          audience: [{ type: 'developer', experience: 'intermediate' }],
-          difficulty: 'intermediate' as DifficultyLevel,
-          category: 'api' as ContentCategory,
-          tags: ['api', 'reference', 'endpoints'],
-          content: [{ type: 'text', content: 'API reference content', metadata: {} }],
-          relatedPages: ['authentication', 'sdk'],
-          lastUpdated: new Date(),
-          estimatedReadTime: 15
-        },
-        {
-          id: 'troubleshooting',
-          title: 'Troubleshooting Guide',
-          description: 'Common issues and solutions',
-          audience: [{ type: 'operations', experience: 'intermediate' }],
-          difficulty: 'intermediate' as DifficultyLevel,
-          category: 'troubleshooting' as ContentCategory,
-          tags: ['troubleshooting', 'errors', 'debugging'],
-          content: [{ type: 'text', content: 'Troubleshooting guide content', metadata: {} }],
-          relatedPages: ['diagnostics', 'support'],
-          lastUpdated: new Date(),
-          estimatedReadTime: 10
-        }
-      ]
+    console.log('APM Documentation systems initialized');
+  };
 
-      searchSystem.indexPages(samplePages)
-      
-      // Initialize recommendation system (no initialize method needed)
-      // recommendationSystem.initialize(samplePages)
-
-      setIsLoading(false)
-      analytics.track('system', 'initialize', 'application_loaded')
-    } catch (error) {
-      console.error('Failed to initialize systems:', error)
-      setError(error instanceof Error ? error.message : 'Failed to initialize application')
-      analytics.trackError(error as Error, 'system_initialization')
-      setIsLoading(false)
-    }
-  }
-
-  const handleSectionChange = (section: AppSection) => {
-    const previousSection = currentSection
-    setCurrentSection(section)
-    analytics.trackNavigation(section, previousSection)
-  }
-
-  const handleRetryInitialization = () => {
-    setIsLoading(true)
-    setError(null)
-    initializeSystems()
-  }
+  useEffect(() => {
+    initializeSystems();
+  }, []);
 
   const renderCurrentSection = () => {
     switch (currentSection) {
+      case 'overview':
+        return <APMOverview onSectionChange={setCurrentSection} />;
       case 'getting-started':
-        return (
-          <ContentErrorBoundary>
-            <QuickStartWizard 
-              platforms={[
-                {
-                  id: 'java',
-                  name: 'Java',
-                  description: 'Java applications with Spring Boot, Tomcat, or standalone',
-                  icon: '☕',
-                  category: 'language',
-                  prerequisites: ['Java 8 or higher', 'Maven or Gradle build system', 'AWS credentials configured'],
-                  installationSteps: [],
-                  verificationSteps: []
-                },
-                {
-                  id: 'python',
-                  name: 'Python',
-                  description: 'Python applications with Django, Flask, FastAPI, or other frameworks',
-                  icon: '🐍',
-                  category: 'language',
-                  prerequisites: ['Python 3.7 or higher', 'pip package manager', 'boto3 library installed'],
-                  installationSteps: [],
-                  verificationSteps: []
-                },
-                {
-                  id: 'nodejs',
-                  name: 'Node.js',
-                  description: 'Node.js applications with Express, Fastify, or other frameworks',
-                  icon: '🟢',
-                  category: 'language',
-                  prerequisites: ['Node.js 14 or higher', 'npm or yarn package manager', 'AWS SDK configured'],
-                  installationSteps: [],
-                  verificationSteps: []
-                }
-              ]}
-              onComplete={() => analytics.track('quickstart', 'completed')} 
-            />
-          </ContentErrorBoundary>
-        )
-      
+      case 'instrumentation':
+        return <QuickStartWizard 
+          platforms={[
+            {
+              id: 'java',
+              name: 'Java',
+              description: 'Java applications with Spring Boot, Tomcat, or standalone',
+              icon: '☕',
+              category: 'language',
+              prerequisites: ['Java 8 or higher', 'Maven or Gradle build system', 'AWS credentials configured'],
+              installationSteps: [],
+              verificationSteps: []
+            },
+            {
+              id: 'python',
+              name: 'Python',
+              description: 'Python applications with Django, Flask, FastAPI, or other frameworks',
+              icon: '🐍',
+              category: 'language',
+              prerequisites: ['Python 3.7 or higher', 'pip package manager', 'boto3 library installed'],
+              installationSteps: [],
+              verificationSteps: []
+            },
+            {
+              id: 'nodejs',
+              name: 'Node.js',
+              description: 'Node.js applications with Express, Fastify, or other frameworks',
+              icon: '🟢',
+              category: 'language',
+              prerequisites: ['Node.js 14 or higher', 'npm or yarn package manager', 'AWS SDK configured'],
+              installationSteps: [],
+              verificationSteps: []
+            }
+          ]}
+          onComplete={() => console.log('Quick start completed')} 
+        />;
+      case 'dynamic-instrumentation':
+        return <DynamicInstrumentationGuide />;
+      case 'agentic-instrumentation':
+        return <AgenticInstrumentationGuide />;
       case 'examples':
-        return (
-          <ContentErrorBoundary>
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Code Examples</h2>
-              <MultiLanguageCodeExample
-                examples={[
-                  {
-                    id: 'js-init',
-                    title: 'JavaScript Initialization',
-                    description: 'Basic CloudWatch APM initialization in JavaScript',
-                    language: 'javascript',
-                    code: 'console.log("CloudWatch APM initialized");',
-                    category: 'getting-started',
-                    difficulty: 'beginner',
-                    tags: ['initialization', 'javascript'],
-                    relatedExamples: [],
-                    lastUpdated: new Date(),
-                    metadata: {
-                      filename: 'app.js',
-                      runnable: true,
-                      testable: true
-                    }
-                  },
-                  {
-                    id: 'py-init',
-                    title: 'Python Initialization',
-                    description: 'Basic CloudWatch APM initialization in Python',
-                    language: 'python', 
-                    code: 'print("CloudWatch APM initialized")',
-                    category: 'getting-started',
-                    difficulty: 'beginner',
-                    tags: ['initialization', 'python'],
-                    relatedExamples: [],
-                    lastUpdated: new Date(),
-                    metadata: {
-                      filename: 'app.py',
-                      runnable: true,
-                      testable: true
-                    }
-                  },
-                  {
-                    id: 'java-init',
-                    title: 'Java Initialization',
-                    description: 'Basic CloudWatch APM initialization in Java',
-                    language: 'java',
-                    code: 'System.out.println("CloudWatch APM initialized");',
-                    category: 'getting-started',
-                    difficulty: 'beginner',
-                    tags: ['initialization', 'java'],
-                    relatedExamples: [],
-                    lastUpdated: new Date(),
-                    metadata: {
-                      filename: 'App.java',
-                      runnable: true,
-                      testable: true
-                    }
-                  }
-                ]}
-                title="Basic Initialization"
-                description="Initialize CloudWatch APM in your application"
-              />
-            </div>
-          </ContentErrorBoundary>
-        )
-      
-      case 'api':
-        return (
-          <ContentErrorBoundary>
-            <APIDocumentationGenerator />
-          </ContentErrorBoundary>
-        )
-      
-      case 'troubleshooting':
-        return (
-          <ContentErrorBoundary>
-            <TroubleshootingCenter />
-          </ContentErrorBoundary>
-        )
-      
-      case 'monitoring':
-        return (
-          <ContentErrorBoundary>
-            <AlertingWizard />
-          </ContentErrorBoundary>
-        )
-      
-      case 'security':
-        return (
-          <ContentErrorBoundary>
-            <SecurityChecklist />
-          </ContentErrorBoundary>
-        )
-      
-      case 'performance':
-        return (
-          <ContentErrorBoundary>
-            <PerformanceMetricsDisplay />
-          </ContentErrorBoundary>
-        )
-      
-      case 'migration':
-        return (
-          <ContentErrorBoundary>
-            <MigrationWizard />
-          </ContentErrorBoundary>
-        )
-      
-      case 'configuration':
-        return (
-          <ContentErrorBoundary>
-            <ConfigurationReferenceGenerator />
-          </ContentErrorBoundary>
-        )
-      
-      case 'cost-optimization':
-        return (
-          <ContentErrorBoundary>
-            <CostOptimizationCenter />
-          </ContentErrorBoundary>
-        )
-      
-      case 'search':
-        return (
-          <SearchErrorBoundary>
-            <SearchInterface 
-              searchSystem={searchSystem}
-              onSearch={(query, resultsCount) => analytics.trackSearch(query, resultsCount)}
-            />
-          </SearchErrorBoundary>
-        )
-      
-      default:
-        return (
-          <ContentErrorBoundary>
-            <div className="space-y-8">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold mb-4">
-                  CloudWatch APM Documentation
-                </h1>
-                <p className="text-xl text-gray-600 mb-8">
-                  Comprehensive documentation for CloudWatch Application Performance Monitoring
-                </p>
-              </div>
+        return <CodeExampleBrowser 
+          examples={[
+            {
+              id: 'dynamic-instrumentation-java',
+              title: 'Dynamic Instrumentation - Java',
+              description: 'Enable dynamic instrumentation for Java applications',
+              language: 'java',
+              code: `// Enable CloudWatch APM Dynamic Instrumentation
+import com.amazonaws.services.cloudwatch.apm.DynamicInstrumentation;
 
-              {/* Quick access cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('getting-started')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">Getting Started</h3>
-                  <p className="text-gray-600">Quick setup and installation guides</p>
-                </div>
-                
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('examples')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">Code Examples</h3>
-                  <p className="text-gray-600">Sample code and implementation patterns</p>
-                </div>
-                
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('api')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">API Reference</h3>
-                  <p className="text-gray-600">Complete API documentation</p>
-                </div>
-                
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('troubleshooting')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">Troubleshooting</h3>
-                  <p className="text-gray-600">Common issues and solutions</p>
-                </div>
-                
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('monitoring')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">Monitoring</h3>
-                  <p className="text-gray-600">Alerting and dashboard setup</p>
-                </div>
-                
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('security')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">Security</h3>
-                  <p className="text-gray-600">Security configuration and compliance</p>
-                </div>
-                
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('cost-optimization')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">💰 Cost Optimization</h3>
-                  <p className="text-gray-600">Reduce APM costs while maintaining visibility</p>
-                </div>
-                
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('performance')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">Performance</h3>
-                  <p className="text-gray-600">Performance optimization and tuning</p>
-                </div>
-                
-                <div 
-                  className="p-6 border rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => handleSectionChange('migration')}
-                >
-                  <h3 className="text-lg font-semibold mb-2">Migration</h3>
-                  <p className="text-gray-600">Migrate from other APM solutions</p>
-                </div>
-              </div>
-
-              {/* Popular content section */}
-              <div className="mt-12">
-                <h2 className="text-2xl font-bold mb-6">Popular Content</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {searchSystem.getPopularContent(undefined, 4).map((content) => (
-                    <div 
-                      key={content.id} 
-                      className="p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => analytics.trackInteraction('popular_content', 'click', { contentId: content.id })}
-                    >
-                      <h3 className="font-semibold">{content.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{content.description}</p>
-                      <div className="flex items-center mt-2 text-xs text-gray-500">
-                        <span>{content.estimatedReadTime} min read</span>
-                        <span className="mx-2">•</span>
-                        <span className="capitalize">{content.difficulty}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </ContentErrorBoundary>
-        )
+public class Application {
+    public static void main(String[] args) {
+        // Initialize dynamic instrumentation
+        DynamicInstrumentation.enable();
+        
+        // Your application code
+        processUserRequest();
     }
-  }
+    
+    public static void processUserRequest() {
+        // This method will be automatically instrumented
+        System.out.println("Processing user request...");
+    }
+}`,
+              category: 'getting-started',
+              difficulty: 'beginner',
+              tags: ['java', 'dynamic-instrumentation', 'setup'],
+              relatedExamples: ['dynamic-instrumentation-python'],
+              lastUpdated: new Date(),
+              metadata: {
+                filename: 'Application.java',
+                runnable: true,
+                testable: true
+              }
+            },
+            {
+              id: 'dynamic-instrumentation-python',
+              title: 'Dynamic Instrumentation - Python',
+              description: 'Enable dynamic instrumentation for Python applications',
+              language: 'python',
+              code: `# Enable CloudWatch APM Dynamic Instrumentation
+import boto3
+from aws_cloudwatch_apm import DynamicInstrumentation
 
-  // Show initialization error
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
-          <div className="flex items-center mb-4">
-            <div className="flex-shrink-0">
-              <svg className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-lg font-medium text-gray-900">
-                Initialization Failed
-              </h3>
-            </div>
-          </div>
-          
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Failed to initialize the documentation system:
-            </p>
-            <p className="text-sm text-red-600 font-mono bg-red-50 p-2 rounded">
-              {error}
-            </p>
-          </div>
-          
-          <div className="flex space-x-3">
-            <button
-              onClick={handleRetryInitialization}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Retry
-            </button>
-            <button
-              onClick={() => window.location.reload()}
-              className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
+def main():
+    # Initialize dynamic instrumentation
+    instrumentation = DynamicInstrumentation()
+    instrumentation.enable()
+    
+    # Your application code
+    process_user_request()
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading CloudWatch APM Documentation...</p>
-          <p className="text-sm text-gray-500 mt-2">Initializing systems and caching critical content</p>
-        </div>
-      </div>
-    )
-  }
+def process_user_request():
+    # This function will be automatically instrumented
+    print("Processing user request...")
+
+if __name__ == "__main__":
+    main()`,
+              category: 'getting-started',
+              difficulty: 'beginner',
+              tags: ['python', 'dynamic-instrumentation', 'setup'],
+              relatedExamples: ['dynamic-instrumentation-java'],
+              lastUpdated: new Date(),
+              metadata: {
+                filename: 'app.py',
+                runnable: true,
+                testable: true
+              }
+            },
+            {
+              id: 'agentic-instrumentation-config',
+              title: 'AI-Powered Instrumentation Configuration',
+              description: 'Configure AI agent for automatic optimization',
+              language: 'yaml',
+              code: `# CloudWatch APM AI Agent Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apm-ai-agent-config
+data:
+  config.yaml: |
+    ai_agent:
+      enabled: true
+      optimization_goals:
+        - cost_reduction
+        - performance_improvement
+        - error_detection
+      
+      auto_implementation:
+        enabled: true
+        risk_tolerance: medium
+        approval_required: false
+      
+      learning_parameters:
+        sampling_optimization: true
+        metric_cleanup: true
+        anomaly_detection: true
+      
+      cost_optimization:
+        target_reduction: 50
+        maintain_accuracy: 95
+        
+    instrumentation:
+      dynamic_targets:
+        - type: method
+          pattern: "*.service.*"
+        - type: endpoint
+          pattern: "/api/*"
+        - type: database
+          pattern: "SELECT|INSERT|UPDATE"`,
+              category: 'configuration',
+              difficulty: 'intermediate',
+              tags: ['ai', 'configuration', 'optimization'],
+              relatedExamples: ['cost-optimization-config'],
+              lastUpdated: new Date(),
+              metadata: {
+                filename: 'apm-config.yaml',
+                runnable: false,
+                testable: false
+              }
+            }
+          ]}
+        />;
+      case 'cost-optimization':
+        return <CostOptimizationCenter />;
+      case 'troubleshooting':
+        return <TroubleshootingCenter />;
+      case 'monitoring':
+        return <MonitoringBestPractices />;
+      case 'security':
+        return <SecurityChecklist />;
+      case 'performance':
+        return <PerformanceMetricsDisplay />;
+      case 'api-reference':
+        return <InteractiveAPIExplorer />;
+      case 'migration':
+        return <MigrationWizard />;
+      default:
+        return <APMOverview onSectionChange={setCurrentSection} />;
+    }
+  };
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
-        {/* Navigation with error boundary */}
-        <NavigationErrorBoundary>
-          <PrimaryNavigation 
-            currentSection={currentSection}
-            onSectionChange={handleSectionChange}
-          />
-        </NavigationErrorBoundary>
-
-        {/* Status indicator */}
-        <div className="fixed top-4 right-4 z-50">
-          <StatusIndicator showDetails={true} />
-        </div>
-
-        {/* Main content */}
-        <main className="container mx-auto px-4 py-8">
-          {renderCurrentSection()}
-        </main>
-
-        {/* Analytics debug panel (development only) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="fixed bottom-4 right-4 bg-white border rounded-lg p-4 shadow-lg max-w-sm">
-            <h4 className="font-semibold mb-2">Analytics Summary</h4>
-            <div className="text-xs space-y-1">
-              {(() => {
-                const summary = analyticsService.getAnalyticsSummary()
-                return (
-                  <>
-                    <div>Events: {summary.totalEvents}</div>
-                    <div>Session: {summary.session?.sessionId.slice(-8)}</div>
-                    <div>Page Views: {summary.session?.pageViews}</div>
-                    <div>Searches: {summary.session?.searchQueries}</div>
-                    <div>Sections: {summary.session?.sectionsVisited.length}</div>
-                  </>
-                )
-              })()}
-            </div>
-          </div>
-        )}
-      </div>
-    </ErrorBoundary>
-  )
+    <APMLayout
+      currentSection={currentSection}
+      onSectionChange={setCurrentSection}
+    >
+      {renderCurrentSection()}
+    </APMLayout>
+  );
 }

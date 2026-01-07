@@ -254,8 +254,8 @@ export const SecurityChecklist: React.FC<SecurityChecklistProps> = ({
                           Required
                         </span>
                       )}
-                      <span className={`text-lg ${getStatusColor(item.status)}`}>
-                        {getStatusIcon(item.status)}
+                      <span className={`text-lg ${getStatusColor(item.status || 'pending')}`}>
+                        {getStatusIcon(item.status || 'pending')}
                       </span>
                     </div>
                     <p className="text-gray-600 mb-3">{item.description}</p>
@@ -264,8 +264,8 @@ export const SecurityChecklist: React.FC<SecurityChecklistProps> = ({
                       <span className="text-sm text-gray-500">
                         Category: {item.category}
                       </span>
-                      <span className={`text-sm font-medium ${getStatusColor(item.status)}`}>
-                        Status: {item.status}
+                      <span className={`text-sm font-medium ${getStatusColor(item.status || 'pending')}`}>
+                        Status: {item.status || 'pending'}
                       </span>
                     </div>
 
@@ -301,7 +301,7 @@ export const SecurityChecklist: React.FC<SecurityChecklistProps> = ({
                       </label>
                       <textarea
                         value={item.notes || ''}
-                        onChange={(e) => handleStatusChange(item.id, item.status, e.target.value)}
+                        onChange={(e) => handleStatusChange(item.id, item.status || 'pending', e.target.value)}
                         placeholder="Add notes about this checklist item..."
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         rows={2}

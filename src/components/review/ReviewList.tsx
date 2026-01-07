@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ReviewRequest, ReviewFilter, ReviewUser } from '@/types/review';
 import { ReviewUtils } from '@/lib/review';
-import { ReviewItem } from './ReviewItem';
+// import { ReviewItem } from './ReviewItem'; // TODO: Create ReviewItem component
 
 interface ReviewListProps {
   reviews: ReviewRequest[];
@@ -294,14 +294,18 @@ export function ReviewList({
       ) : viewMode === 'list' ? (
         <div className="space-y-4">
           {processedReviews.map((review) => (
-            <ReviewItem
+            <div key={review.id} className="p-4 border rounded-lg">
+              <div className="text-gray-500">ReviewItem component not yet implemented</div>
+              <div className="text-sm text-gray-400">Review ID: {review.id}</div>
+            </div>
+            /* <ReviewItem
               key={review.id}
               review={review}
               currentUser={currentUser}
               onUpdate={onUpdate}
               onSubmitReview={onSubmitReview}
               onApprove={onApprove}
-            />
+            /> */
           ))}
         </div>
       ) : (

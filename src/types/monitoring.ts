@@ -331,10 +331,10 @@ export const AlertConfigurationSchema = z.object({
   actions: z.array(z.object({
     type: z.enum(['auto_scaling', 'lambda', 'ec2', 'custom']),
     target: z.string().min(1),
-    parameters: z.record(z.unknown()),
+    parameters: z.record(z.string(), z.unknown()),
     enabled: z.boolean()
   })),
-  tags: z.record(z.string()),
+  tags: z.record(z.string(), z.string()),
   enabled: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date()
@@ -367,7 +367,7 @@ export const DashboardTemplateSchema = z.object({
         color: z.string(),
         label: z.string().optional()
       })).optional(),
-      customOptions: z.record(z.unknown()).optional()
+      customOptions: z.record(z.string(), z.unknown()).optional()
     }),
     position: z.object({
       x: z.number(),

@@ -133,7 +133,7 @@ export const ArchitecturePatternLibrary: React.FC<ArchitecturePatternLibraryProp
 
               {/* Scaling Properties */}
               <div className="mb-3">
-                <h7 className="text-xs font-medium text-gray-700 mb-1 block">Scaling Properties</h7>
+                <div className="text-xs font-medium text-gray-700 mb-1 block">Scaling Properties</div>
                 <div className="flex flex-wrap gap-2 text-xs">
                   {component.scalingProperties.horizontal && (
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">Horizontal</span>
@@ -153,7 +153,7 @@ export const ArchitecturePatternLibrary: React.FC<ArchitecturePatternLibraryProp
               {/* Dependencies */}
               {component.dependencies.length > 0 && (
                 <div>
-                  <h7 className="text-xs font-medium text-gray-700 mb-1 block">Dependencies</h7>
+                  <div className="text-xs font-medium text-gray-700 mb-1 block">Dependencies</div>
                   <div className="flex flex-wrap gap-1">
                     {component.dependencies.map(dep => (
                       <span key={dep} className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
@@ -171,7 +171,7 @@ export const ArchitecturePatternLibrary: React.FC<ArchitecturePatternLibraryProp
                   <div className="text-gray-600">
                     {Object.entries(component.configuration).slice(0, 3).map(([key, value]) => (
                       <div key={key}>
-                        {key}: {typeof value === 'boolean' ? value.toString() : value}
+                        {key}: {typeof value === 'boolean' ? value.toString() : String(value)}
                       </div>
                     ))}
                     {Object.keys(component.configuration).length > 3 && (
@@ -343,7 +343,7 @@ export const ArchitecturePatternLibrary: React.FC<ArchitecturePatternLibraryProp
                 {dashboard.widgets.map((widget, index) => (
                   <div key={index} className="bg-gray-50 border rounded p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <h7 className="text-sm font-medium text-gray-900">{widget.title}</h7>
+                      <div className="text-sm font-medium text-gray-900">{widget.title}</div>
                       <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
                         {widget.type}
                       </span>

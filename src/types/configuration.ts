@@ -221,7 +221,7 @@ export const PerformanceCharacteristicsSchema = z.object({
 
 export const MonitoringRecommendationsSchema = z.object({
   keyMetrics: z.array(z.string()),
-  alertThresholds: z.record(z.unknown()),
+  alertThresholds: z.record(z.string(), z.unknown()),
   dashboards: z.array(z.string()),
   troubleshooting: z.array(z.string())
 })
@@ -231,7 +231,7 @@ export const ConfigurationUseCaseSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   scenario: z.string().min(1),
-  configuration: z.record(z.unknown()),
+  configuration: z.record(z.string(), z.unknown()),
   explanation: z.string().min(1),
   platforms: z.array(z.string()),
   environment: z.string().min(1),

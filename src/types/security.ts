@@ -534,7 +534,7 @@ export const SecurityConfigurationSchema = z.object({
       id: z.string().min(1),
       title: z.string().min(1),
       description: z.string().min(1),
-      configuration: z.record(z.unknown()),
+      configuration: z.record(z.string(), z.unknown()),
       explanation: z.string().min(1),
       securityLevel: SecurityLevelSchema,
       environment: z.string().min(1)
@@ -570,7 +570,7 @@ export const SecurityConfigurationSchema = z.object({
       type: z.enum(['scanner', 'analyzer', 'monitor', 'validator', 'generator']),
       installation: z.string().min(1),
       usage: z.string().min(1),
-      configuration: z.record(z.unknown()).optional(),
+      configuration: z.record(z.string(), z.unknown()).optional(),
       platforms: z.array(z.string())
     }))
   }),
