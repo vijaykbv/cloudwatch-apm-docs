@@ -20,7 +20,6 @@ type APMSection =
 interface NavigationItem {
   id: APMSection;
   title: string;
-  icon: string;
   children?: NavigationItem[];
   badge?: string;
   isNew?: boolean;
@@ -38,62 +37,53 @@ const navigationStructure: NavigationItem[] = [
   {
     id: 'overview',
     title: 'APM Overview',
-    icon: '📊',
     badge: 'Start Here'
   },
   {
     id: 'getting-started',
     title: 'Getting Started',
-    icon: '🚀',
     children: [
-      { id: 'instrumentation', title: 'Instrumentation Basics', icon: '🔧' },
-      { id: 'dynamic-instrumentation', title: 'Dynamic Instrumentation', icon: '⚡', isNew: true },
-      { id: 'agentic-instrumentation', title: 'Agentic Instrumentation', icon: '🤖', isNew: true }
+      { id: 'instrumentation', title: 'Instrumentation Basics' },
+      { id: 'dynamic-instrumentation', title: 'Dynamic Instrumentation', isNew: true },
+      { id: 'agentic-instrumentation', title: 'Agentic Instrumentation', isNew: true }
     ]
   },
   {
     id: 'examples',
     title: 'Implementation Examples',
-    icon: '💻',
     children: [
-      { id: 'examples', title: 'Code Examples', icon: '📝' },
-      { id: 'best-practices', title: 'Best Practices', icon: '⭐' }
+      { id: 'examples', title: 'Code Examples' },
+      { id: 'best-practices', title: 'Best Practices' }
     ]
   },
   {
     id: 'monitoring',
     title: 'Monitoring & Observability',
-    icon: '👁️',
     children: [
-      { id: 'monitoring', title: 'Dashboards & Metrics', icon: '📈' },
-      { id: 'troubleshooting', title: 'Troubleshooting', icon: '🔍' }
+      { id: 'monitoring', title: 'Dashboards & Metrics' },
+      { id: 'troubleshooting', title: 'Troubleshooting' }
     ]
   },
   {
     id: 'cost-optimization',
     title: 'Cost Management',
-    icon: '💰',
     badge: 'Popular'
   },
   {
     id: 'performance',
-    title: 'Performance Tuning',
-    icon: '⚡'
+    title: 'Performance Tuning'
   },
   {
     id: 'security',
-    title: 'Security & Compliance',
-    icon: '🔒'
+    title: 'Security & Compliance'
   },
   {
     id: 'api-reference',
-    title: 'API Reference',
-    icon: '📚'
+    title: 'API Reference'
   },
   {
     id: 'migration',
-    title: 'Migration Guide',
-    icon: '🔄'
+    title: 'Migration Guide'
   }
 ];
 
@@ -142,9 +132,6 @@ export const APMSidebar: React.FC<APMSidebarProps> = ({
           <div className="flex items-center flex-1 min-w-0">
             {!isCollapsed && (
               <>
-                <span className="mr-3 text-lg flex-shrink-0" aria-hidden="true">
-                  {item.icon}
-                </span>
                 <span className="truncate">{item.title}</span>
                 {item.badge && (
                   <span className={`ml-2 px-2 py-1 text-xs rounded-full flex-shrink-0 ${
@@ -228,9 +215,6 @@ export const APMSidebar: React.FC<APMSidebarProps> = ({
         <div className="p-4 border-t border-gray-200 flex-shrink-0">
           <div className="bg-blue-50 rounded-lg p-3">
             <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <span className="text-blue-500 text-lg">💡</span>
-              </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-blue-900">Quick Tip</h3>
                 <p className="text-xs text-blue-700 mt-1">

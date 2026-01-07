@@ -37,9 +37,6 @@ const DynamicInstrumentationGuide: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-            <PlayIcon className="w-6 h-6 text-blue-600" />
-          </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dynamic Instrumentation</h1>
             <p className="text-gray-600 mt-1">
@@ -50,11 +47,6 @@ const DynamicInstrumentationGuide: React.FC = () => {
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-sm">💡</span>
-              </div>
-            </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-blue-900">Zero-Code Observability</h3>
               <p className="text-sm text-blue-700 mt-1">
@@ -69,9 +61,6 @@ const DynamicInstrumentationGuide: React.FC = () => {
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center mb-3">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-              <PlayIcon className="w-5 h-5 text-green-600" />
-            </div>
             <h3 className="text-lg font-semibold">Instant Activation</h3>
           </div>
           <p className="text-gray-600">
@@ -81,9 +70,6 @@ const DynamicInstrumentationGuide: React.FC = () => {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center mb-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-blue-600 text-sm">⚙️</span>
-            </div>
             <h3 className="text-lg font-semibold">Runtime Control</h3>
           </div>
           <p className="text-gray-600">
@@ -93,9 +79,6 @@ const DynamicInstrumentationGuide: React.FC = () => {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center mb-3">
-            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-purple-600 text-sm">📊</span>
-            </div>
             <h3 className="text-lg font-semibold">Targeted Insights</h3>
           </div>
           <p className="text-gray-600">
@@ -159,9 +142,6 @@ const AgenticInstrumentationGuide: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-            <SparklesIcon className="w-6 h-6 text-purple-600" />
-          </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Agentic Instrumentation</h1>
             <p className="text-gray-600 mt-1">
@@ -172,11 +152,6 @@ const AgenticInstrumentationGuide: React.FC = () => {
 
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
           <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <SparklesIcon className="w-5 h-5 text-purple-600" />
-              </div>
-            </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-purple-900">Intelligent Automation</h3>
               <p className="text-sm text-purple-700 mt-1">
@@ -190,9 +165,6 @@ const AgenticInstrumentationGuide: React.FC = () => {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <span className="text-blue-600 text-lg">🧠</span>
-          </div>
           <h3 className="font-semibold mb-2">Pattern Recognition</h3>
           <p className="text-sm text-gray-600">
             Identifies performance patterns and anomalies across your entire application stack
@@ -200,9 +172,6 @@ const AgenticInstrumentationGuide: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <span className="text-yellow-600 text-lg">💡</span>
-          </div>
           <h3 className="font-semibold mb-2">Smart Recommendations</h3>
           <p className="text-sm text-gray-600">
             Provides actionable insights with estimated impact and implementation effort
@@ -210,9 +179,6 @@ const AgenticInstrumentationGuide: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <SparklesIcon className="w-6 h-6 text-purple-600" />
-          </div>
           <h3 className="font-semibold mb-2">Auto-Optimization</h3>
           <p className="text-sm text-gray-600">
             Automatically adjusts sampling rates and configurations based on learned patterns
@@ -220,9 +186,6 @@ const AgenticInstrumentationGuide: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <span className="text-green-600 text-lg">📈</span>
-          </div>
           <h3 className="font-semibold mb-2">Predictive Insights</h3>
           <p className="text-sm text-gray-600">
             Forecasts potential issues and suggests proactive instrumentation changes
@@ -263,9 +226,6 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
     <div className="max-w-6xl mx-auto p-6">
       {/* Hero Section */}
       <div className="text-center mb-12">
-        <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <span className="text-3xl">📊</span>
-        </div>
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           CloudWatch Application Performance Monitoring
         </h1>
@@ -298,9 +258,6 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
           className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => onSectionChange('dynamic-instrumentation')}
         >
-          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-            <PlayIcon className="w-6 h-6 text-blue-600" />
-          </div>
           <h3 className="text-xl font-semibold mb-3">Dynamic Instrumentation</h3>
           <p className="text-gray-600 mb-4">
             Add observability to running applications without code changes or deployments. 
@@ -315,9 +272,6 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
           className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => onSectionChange('agentic-instrumentation')}
         >
-          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-            <SparklesIcon className="w-6 h-6 text-purple-600" />
-          </div>
           <h3 className="text-xl font-semibold mb-3">AI-Powered Optimization</h3>
           <p className="text-gray-600 mb-4">
             Let AI automatically optimize your instrumentation, reduce costs, and identify 
@@ -332,9 +286,6 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
           className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => onSectionChange('cost-optimization')}
         >
-          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-            <span className="text-green-600 text-xl">💰</span>
-          </div>
           <h3 className="text-xl font-semibold mb-3">Cost Optimization</h3>
           <p className="text-gray-600 mb-4">
             Reduce monitoring costs by up to 90% with intelligent sampling, automated 
@@ -401,9 +352,6 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
           onClick={() => onSectionChange('examples')}
           className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
         >
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
-            <span className="text-lg">💻</span>
-          </div>
           <h3 className="font-semibold mb-1">Code Examples</h3>
           <p className="text-sm text-gray-600">Ready-to-use implementation examples</p>
         </button>
@@ -412,9 +360,6 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
           onClick={() => onSectionChange('troubleshooting')}
           className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
         >
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
-            <span className="text-lg">🔧</span>
-          </div>
           <h3 className="font-semibold mb-1">Troubleshooting</h3>
           <p className="text-sm text-gray-600">Solve common APM issues quickly</p>
         </button>
@@ -423,9 +368,6 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
           onClick={() => onSectionChange('api-reference')}
           className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
         >
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
-            <span className="text-lg">📚</span>
-          </div>
           <h3 className="font-semibold mb-1">API Reference</h3>
           <p className="text-sm text-gray-600">Complete API documentation</p>
         </button>
@@ -434,9 +376,6 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
           onClick={() => onSectionChange('migration')}
           className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
         >
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
-            <span className="text-lg">🔄</span>
-          </div>
           <h3 className="font-semibold mb-1">Migration Guide</h3>
           <p className="text-sm text-gray-600">Migrate from other APM solutions</p>
         </button>

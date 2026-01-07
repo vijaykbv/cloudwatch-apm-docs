@@ -66,13 +66,7 @@ export const DynamicInstrumentationGuide: React.FC = () => {
   };
 
   const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'method': return <CogIcon className="w-4 h-4 text-gray-600" />;
-      case 'class': return <span className="text-gray-600 text-sm">📦</span>;
-      case 'endpoint': return <span className="text-gray-600 text-sm">🌐</span>;
-      case 'database': return <span className="text-gray-600 text-sm">🗄️</span>;
-      default: return <ChartBarIcon className="w-4 h-4 text-gray-600" />;
-    }
+    return null; // Remove all icons
   };
 
   return (
@@ -80,9 +74,6 @@ export const DynamicInstrumentationGuide: React.FC = () => {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-            <PlayIcon className="w-6 h-6 text-blue-600" />
-          </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dynamic Instrumentation</h1>
             <p className="text-gray-600 mt-1">
@@ -93,11 +84,6 @@ export const DynamicInstrumentationGuide: React.FC = () => {
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-sm">💡</span>
-              </div>
-            </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-blue-900">Zero-Code Observability</h3>
               <p className="text-sm text-blue-700 mt-1">
@@ -163,9 +149,6 @@ export const DynamicInstrumentationGuide: React.FC = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                        {getTypeIcon(target.type)}
-                      </div>
                       <div>
                         <h4 className="font-medium">{target.name}</h4>
                         <p className="text-sm text-gray-600 capitalize">{target.type}</p>
