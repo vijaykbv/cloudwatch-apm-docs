@@ -385,7 +385,7 @@ export const APMSidebar: React.FC<APMSidebarProps> = ({
     const hasChildren = item.children && item.children.length > 0;
 
     return (
-      <div key={`${item.id}-${item.title}-${level}`} className="mb-1">
+      <div key={`${item.id}-${item.title}-${level}`} className={level === 0 ? "mb-4" : "mb-1"}>
         <div
           className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
             isActive
@@ -411,7 +411,7 @@ export const APMSidebar: React.FC<APMSidebarProps> = ({
           <div className="flex items-center flex-1 min-w-0">
             {!isCollapsed && (
               <>
-                <span className="truncate">{item.title}</span>
+                <span className={`truncate ${level === 0 ? 'font-bold' : ''}`}>{item.title}</span>
                 {item.badge && (
                   <span className={`ml-2 px-2 py-1 text-xs rounded-full flex-shrink-0 ${
                     item.badge === 'Start Here' 
