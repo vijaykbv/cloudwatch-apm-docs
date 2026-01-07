@@ -13,20 +13,25 @@ import { MigrationWizard } from '@/components/migration/MigrationWizard';
 import { CodeExampleBrowser } from '@/components/examples/CodeExampleBrowser';
 
 type APMSection = 
-  | 'overview'
+  | 'home'
   | 'getting-started'
-  | 'instrumentation'
-  | 'dynamic-instrumentation'
-  | 'agentic-instrumentation'
-  | 'examples'
-  | 'monitoring'
-  | 'troubleshooting'
-  | 'cost-optimization'
-  | 'performance'
-  | 'security'
+  | 'concepts-fundamentals'
+  | 'implementation-guides'
+  | 'features-capabilities'
+  | 'use-cases-patterns'
+  | 'tutorials-workshops'
+  | 'examples-code-samples'
   | 'api-reference'
-  | 'migration'
-  | 'best-practices';
+  | 'best-practices'
+  | 'troubleshooting'
+  | 'security-compliance'
+  | 'integrations'
+  | 'dashboards-visualization'
+  | 'learning-resources'
+  | 'support-resources'
+  | 'reference'
+  | 'whats-new'
+  | 'related-services';
 
 // Simple Navigation Component - REMOVED (using APMLayout instead)
 
@@ -235,13 +240,13 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
-            onClick={() => onSectionChange('dynamic-instrumentation')}
+            onClick={() => onSectionChange('implementation-guides')}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
           >
-            Start with Dynamic Instrumentation
+            Start with Implementation Guides
           </button>
           <button
-            onClick={() => onSectionChange('agentic-instrumentation')}
+            onClick={() => onSectionChange('tutorials-workshops')}
             className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700"
           >
             Try AI-Powered APM
@@ -253,7 +258,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
       <div className="grid md:grid-cols-3 gap-8 mb-12">
         <div 
           className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => onSectionChange('dynamic-instrumentation')}
+          onClick={() => onSectionChange('implementation-guides')}
         >
           <h3 className="text-xl font-semibold mb-3">Dynamic Instrumentation</h3>
           <p className="text-gray-600 mb-4">
@@ -267,7 +272,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
 
         <div 
           className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => onSectionChange('agentic-instrumentation')}
+          onClick={() => onSectionChange('tutorials-workshops')}
         >
           <h3 className="text-xl font-semibold mb-3">AI-Powered Optimization</h3>
           <p className="text-gray-600 mb-4">
@@ -281,7 +286,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
 
         <div 
           className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => onSectionChange('cost-optimization')}
+          onClick={() => onSectionChange('best-practices')}
         >
           <h3 className="text-xl font-semibold mb-3">Cost Optimization</h3>
           <p className="text-gray-600 mb-4">
@@ -346,7 +351,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
       {/* Quick Actions */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         <button
-          onClick={() => onSectionChange('examples')}
+          onClick={() => onSectionChange('examples-code-samples')}
           className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
         >
           <h3 className="font-semibold mb-1">Code Examples</h3>
@@ -370,7 +375,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
         </button>
 
         <button
-          onClick={() => onSectionChange('migration')}
+          onClick={() => onSectionChange('use-cases-patterns')}
           className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:shadow-md transition-shadow"
         >
           <h3 className="font-semibold mb-1">Migration Guide</h3>
@@ -382,7 +387,7 @@ const APMOverview: React.FC<{ onSectionChange: (section: APMSection) => void }> 
 };
 
 export default function Home() {
-  const [currentSection, setCurrentSection] = useState<APMSection>('overview');
+  const [currentSection, setCurrentSection] = useState<APMSection>('home');
 
   const initializeSystems = async () => {
     console.log('APM Documentation systems initialized');
@@ -394,10 +399,10 @@ export default function Home() {
 
   const renderCurrentSection = () => {
     switch (currentSection) {
-      case 'overview':
+      case 'home':
         return <APMOverview onSectionChange={setCurrentSection} />;
       case 'getting-started':
-      case 'instrumentation':
+      case 'implementation-guides':
         return <QuickStartWizard 
           platforms={[
             {
@@ -433,11 +438,11 @@ export default function Home() {
           ]}
           onComplete={() => console.log('Quick start completed')} 
         />;
-      case 'dynamic-instrumentation':
+      case 'concepts-fundamentals':
         return <DynamicInstrumentationGuide />;
-      case 'agentic-instrumentation':
+      case 'tutorials-workshops':
         return <AgenticInstrumentationGuide />;
-      case 'examples':
+      case 'examples-code-samples':
         return <CodeExampleBrowser 
           examples={[
             {
@@ -561,19 +566,19 @@ data:
             }
           ]}
         />;
-      case 'cost-optimization':
+      case 'best-practices':
         return <CostOptimizationCenter />;
       case 'troubleshooting':
         return <TroubleshootingCenter />;
-      case 'monitoring':
+      case 'features-capabilities':
         return <MonitoringBestPractices />;
-      case 'security':
+      case 'security-compliance':
         return <SecurityChecklist />;
-      case 'performance':
+      case 'dashboards-visualization':
         return <PerformanceMetricsDisplay />;
       case 'api-reference':
         return <InteractiveAPIExplorer />;
-      case 'migration':
+      case 'use-cases-patterns':
         return <MigrationWizard />;
       default:
         return <APMOverview onSectionChange={setCurrentSection} />;

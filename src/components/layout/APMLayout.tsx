@@ -2,20 +2,25 @@ import React, { useState } from 'react';
 import APMSidebar from '../navigation/APMSidebar';
 
 type APMSection = 
-  | 'overview'
+  | 'home'
   | 'getting-started'
-  | 'instrumentation'
-  | 'dynamic-instrumentation'
-  | 'agentic-instrumentation'
-  | 'examples'
-  | 'monitoring'
-  | 'troubleshooting'
-  | 'cost-optimization'
-  | 'performance'
-  | 'security'
+  | 'concepts-fundamentals'
+  | 'implementation-guides'
+  | 'features-capabilities'
+  | 'use-cases-patterns'
+  | 'tutorials-workshops'
+  | 'examples-code-samples'
   | 'api-reference'
-  | 'migration'
-  | 'best-practices';
+  | 'best-practices'
+  | 'troubleshooting'
+  | 'security-compliance'
+  | 'integrations'
+  | 'dashboards-visualization'
+  | 'learning-resources'
+  | 'support-resources'
+  | 'reference'
+  | 'whats-new'
+  | 'related-services';
 
 interface APMLayoutProps {
   children: React.ReactNode;
@@ -33,40 +38,50 @@ export const APMLayout: React.FC<APMLayoutProps> = ({
 
   const getSectionTitle = (section: APMSection): string => {
     const titles: Record<APMSection, string> = {
-      'overview': 'APM Overview',
+      'home': 'CloudWatch APM Home',
       'getting-started': 'Getting Started',
-      'instrumentation': 'Instrumentation Basics',
-      'dynamic-instrumentation': 'Dynamic Instrumentation',
-      'agentic-instrumentation': 'Agentic Instrumentation',
-      'examples': 'Implementation Examples',
-      'monitoring': 'Monitoring & Observability',
-      'troubleshooting': 'Troubleshooting',
-      'cost-optimization': 'Cost Management',
-      'performance': 'Performance Tuning',
-      'security': 'Security & Compliance',
+      'concepts-fundamentals': 'Concepts & Fundamentals',
+      'implementation-guides': 'Implementation Guides',
+      'features-capabilities': 'Features & Capabilities',
+      'use-cases-patterns': 'Use Cases & Patterns',
+      'tutorials-workshops': 'Tutorials & Workshops',
+      'examples-code-samples': 'Examples & Code Samples',
       'api-reference': 'API Reference',
-      'migration': 'Migration Guide',
-      'best-practices': 'Best Practices'
+      'best-practices': 'Best Practices',
+      'troubleshooting': 'Troubleshooting',
+      'security-compliance': 'Security & Compliance',
+      'integrations': 'Integrations',
+      'dashboards-visualization': 'Dashboards & Visualization',
+      'learning-resources': 'Learning Resources',
+      'support-resources': 'Support & Resources',
+      'reference': 'Reference',
+      'whats-new': "What's New",
+      'related-services': 'Related Services'
     };
     return titles[section] || 'CloudWatch APM';
   };
 
   const getBreadcrumbs = (section: APMSection): string[] => {
     const breadcrumbMap: Record<APMSection, string[]> = {
-      'overview': ['Home'],
+      'home': ['Home'],
       'getting-started': ['Getting Started'],
-      'instrumentation': ['Getting Started', 'Instrumentation Basics'],
-      'dynamic-instrumentation': ['Getting Started', 'Dynamic Instrumentation'],
-      'agentic-instrumentation': ['Getting Started', 'Agentic Instrumentation'],
-      'examples': ['Implementation Examples'],
-      'monitoring': ['Monitoring & Observability'],
-      'troubleshooting': ['Troubleshooting'],
-      'cost-optimization': ['Cost Management'],
-      'performance': ['Performance Tuning'],
-      'security': ['Security & Compliance'],
+      'concepts-fundamentals': ['Concepts & Fundamentals'],
+      'implementation-guides': ['Implementation Guides'],
+      'features-capabilities': ['Features & Capabilities'],
+      'use-cases-patterns': ['Use Cases & Patterns'],
+      'tutorials-workshops': ['Tutorials & Workshops'],
+      'examples-code-samples': ['Examples & Code Samples'],
       'api-reference': ['API Reference'],
-      'migration': ['Migration Guide'],
-      'best-practices': ['Best Practices']
+      'best-practices': ['Best Practices'],
+      'troubleshooting': ['Troubleshooting'],
+      'security-compliance': ['Security & Compliance'],
+      'integrations': ['Integrations'],
+      'dashboards-visualization': ['Dashboards & Visualization'],
+      'learning-resources': ['Learning Resources'],
+      'support-resources': ['Support & Resources'],
+      'reference': ['Reference'],
+      'whats-new': ["What's New"],
+      'related-services': ['Related Services']
     };
     return breadcrumbMap[section] || ['Home'];
   };
@@ -96,7 +111,7 @@ export const APMLayout: React.FC<APMLayoutProps> = ({
                   <ol className="flex items-center space-x-2 text-sm text-gray-500">
                     <li>
                       <button
-                        onClick={() => onSectionChange('overview')}
+                        onClick={() => onSectionChange('home')}
                         className="hover:text-gray-700"
                       >
                         CloudWatch APM
