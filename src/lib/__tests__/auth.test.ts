@@ -49,7 +49,8 @@ describe('AuthService', () => {
       expect(url).toContain('response_type=code');
       expect(url).toContain('client_id=test-client-id');
       expect(url).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fcallback');
-      expect(url).toContain('scope=email%20openid%20profile');
+      // Accept both %20 and + for spaces (both are valid URL encoding)
+      expect(url).toMatch(/scope=email(%20|\+)openid(%20|\+)profile/);
       expect(url).toContain('identity_provider=AWSSSO');
       expect(url).toContain('state=test-state');
     });
