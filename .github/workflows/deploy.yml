@@ -124,7 +124,7 @@ jobs:
           NEXT_PUBLIC_AWS_REGION: ${{ env.AWS_REGION }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.environment }}
           path: |

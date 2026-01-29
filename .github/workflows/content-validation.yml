@@ -82,7 +82,7 @@ jobs:
           node scripts/generate-content-report.js > content-report.md
 
       - name: Upload content report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: content-report
           path: content-report.md
